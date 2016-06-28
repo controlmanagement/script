@@ -2,7 +2,7 @@ import math
 import time
 import datetime
 import controller
-#import ccd
+import ccd
 from pyslalib import slalib
 
 
@@ -16,8 +16,8 @@ class opt_point_controller(object):
     dut1 = 0.14708
     
     def __init__(self):
-        #self.ctrl = controller.controller()
-        #self.ccd = ccd.ccd_controller()
+        self.ctrl = controller.controller()
+        self.ccd = ccd.ccd_controller()
         return
     
     def calc_star_azel(self, ra, dec, mjd):
@@ -95,7 +95,7 @@ class opt_point_controller(object):
                         if i == num-1:
                             target_list.insert(num, list)
             
-            #print(target_list)
+            print(target_list)
             line = f.readline()
         
         f.close()
@@ -129,17 +129,17 @@ class opt_point_controller(object):
                 
                 #print(ret)
                 
-                track_flag = ["TRUE", "TRUE"] #for test
-                #track_flag = self.ctrl.read_track()
+                #track_flag = ["TRUE", "TRUE"] #for test
+                track_flag = self.ctrl.read_track()
                 #wait track
                 while track_flag[0] == "FALSE" or track_flag[1] == "FALSE":
                     time.sleep(0.5)
-                    #track_flag = self.ctrl.read_track()
-                #status = self.ctrl.read_status()
+                    track_flag = self.ctrl.read_track()
+                status = self.ctrl.read_status()
                 tv = time.time()
                 mjd2 = tv/24./3600. + 40587.0
                 n_star = self.calc_star_azel(table[i][1], table[i][2], mjd2)
-                #self.ccd.all_sky_shot(table[i][0], table[i][3], n_star[0], n_star[1], data_name, status)
+                self.ccd.all_sky_shot(table[i][0], table[i][3], n_star[0], n_star[1], data_name, status)
             else:
                 #out of range(El)
                 pass
