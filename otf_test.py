@@ -76,7 +76,7 @@ class otf(object):
 				self.antenna.radec_move(float(param[4]), float(param[5]), coord_mode, float(param[20]), float(param[21]), hosei)
 				time.sleep(0.1)
 			elif coord_sys == "GALACTIC":
-				self.antenna.galactic_move(float(param[4]), float(param[5]), coord_mode, float(param[20]), float(param[21]), hosei)
+				self.antenna.galactic_move(float(param[4]), float(param[5]), float(param[20]), float(param[21]), hosei)
 				time.sleep(0.1)
             		else:
                 		print("!!coord_sys is EQUATRIAL or GALACTIC!!")
