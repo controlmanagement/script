@@ -26,6 +26,7 @@ class otf(object):
         self.otf_thread.join()
         print(3)
         self.antenna.otf_end()
+        print("!!STOP observation!!")
         return
     
     def otf(self, script, hosei): # reference:[operator_otf.py]
@@ -118,13 +119,14 @@ class otf(object):
             self.antenna.otf_start(sx, sy, 0, coord_sys, dx, dy, dt, int(param[19]), rampt, 0, lamda, hosei, coord_mode)
             #self.get_data(stime,???)
             
-            print("line:"+str(scan_count))
+            print("line:"+str(scan_count+1))
             
             if self.stop_thread.is_set():
                 print("c")
                 sys.exit()
             print("d")
             
+        print("!!FINISH observation!!")
         self.antenna.otf_end()
         return
 
