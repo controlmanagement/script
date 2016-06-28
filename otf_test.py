@@ -4,6 +4,7 @@ import math
 import antenna_nanten
 import threading
 import sys
+import receiver_nanten
 
 
 class otf(object):
@@ -11,6 +12,7 @@ class otf(object):
     
     def __init__(self):
         self.antenna = antenna_nanten.antenna_nanten()
+        self.rx = receiver_nanten.receiver_nanten()
         pass
     
     def otf_start(self, script, hosei):
@@ -45,7 +47,7 @@ class otf(object):
             line = f.readline()
         f.close()
         
-        #param[2]=on_x, param[3]=on_y, param[4]=off_x, param[5]=off_y, param[6]=coord_mode, param[12]=start_x, param[13]=start_y, param[19]=n,
+        #param[2]=on_x, param[3]=on_y, param[4]=off_x, param[5]=off_y, param[6]=coord_mode, param[12]=start_x, param[13]=start_y, param[15]=exposure, param[19]=n,
         #param[18]/param[16]=dt, param[25]/param[16]=rampt
         #delay=0 => for adjust time(OFF to ON time)
         if int(param[14]) == 0:
@@ -67,6 +69,10 @@ class otf(object):
             coord_mode = 0
             pass
         lamda = c/(float(param[39])*math.pow(10, 6))
+        line_point = param[17]/param[15] #scan point for 1line
+        if line_point > int(line_point):
+            print("!!ERROR scan number!!")
+            return
         print("coord_sys = "+coord_sys)
         total_count = int(param[19])
         
@@ -88,7 +94,7 @@ class otf(object):
             while ret[0] == "FALSE" or ret[1] == "FALSE":
                 ret = self.antenna.read_track()
                 time.sleep(0.5)
-            #self.???.get_data
+            self.rx.oneshot()
             self.antenna.tracking_end()
             
             print("b")
@@ -115,9 +121,8 @@ class otf(object):
                 sy = float(param[3]) + float(param[13])/3600.
             self.antenna.otf_tracking_end()
             stime = (40587 + time.time()/(24.*3600.))+(0+rampt)/24./3600. # 0 = delay ,for test
-            #self.get_data(stime,???)    or stime from self.antenna.otf_start
             self.antenna.otf_start(sx, sy, 0, coord_sys, dx, dy, dt, int(param[19]), rampt, 0, lamda, hosei, coord_mode)
-            #self.get_data(stime,???)
+            self.rx.oneshot(line_point, param[15], 0)
             
             print("line:"+str(scan_count+1))
             
