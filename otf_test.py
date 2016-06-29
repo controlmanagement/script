@@ -69,7 +69,7 @@ class otf(object):
             coord_mode = 0
             pass
         lamda = c/(float(param[39])*math.pow(10, 6))
-        line_point = param[17]/param[15] #scan point for 1line
+        line_point = float(param[17])/float(param[15] #scan point for 1line
         if line_point > int(line_point):
             print("!!ERROR scan number!!")
             return
@@ -94,7 +94,7 @@ class otf(object):
             while ret[0] == "FALSE" or ret[1] == "FALSE":
                 ret = self.antenna.read_track()
                 time.sleep(0.5)
-            self.rx.oneshot()
+            self.rx.oneshot_dfs()
             self.antenna.tracking_end()
             
             print("b")
@@ -122,7 +122,7 @@ class otf(object):
             self.antenna.otf_tracking_end()
             stime = (40587 + time.time()/(24.*3600.))+(0+rampt)/24./3600. # 0 = delay ,for test
             self.antenna.otf_start(sx, sy, 0, coord_sys, dx, dy, dt, int(param[19]), rampt, 0, lamda, hosei, coord_mode)
-            self.rx.oneshot(line_point, param[15], 0)
+            self.rx.oneshot_dfs(line_point, param[15], 0)
             
             print("line:"+str(scan_count+1))
             
