@@ -2,13 +2,13 @@ import math
 import time
 import datetime
 import controller
-import ccd
+import core.ccd
 from pyslalib import slalib
 
 
 
 class opt_point_controller(object):
-    #reference : ccd.cpp, imageppm.cpp, imagepgm.cpp
+    #reference : ccd.py, imageppm.cpp, imagepgm.cpp
     
     
     pointing_list = "./pointing.list"
@@ -17,7 +17,7 @@ class opt_point_controller(object):
     
     def __init__(self):
         self.ctrl = controller.controller()
-        self.ccd = ccd.ccd_controller()
+        self.ccd = core.ccd.ccd_controller()
         return
     
     def calc_star_azel(self, ra, dec, mjd):
@@ -95,7 +95,7 @@ class opt_point_controller(object):
                         if i == num-1:
                             target_list.insert(num, list)
             
-            print(target_list)
+            #print(target_list)
             line = f.readline()
         
         f.close()
@@ -127,14 +127,16 @@ class opt_point_controller(object):
             if real_el >= 30. and real_el <= 80.:
                 #self.ctrl.radec_move(table[i][1], table[i][2], "J2000")
                 
-                #print(ret)
+                print(ret)
                 
-                #track_flag = ["TRUE", "TRUE"] #for test
-                track_flag = self.ctrl.read_track()
+                track_flag = ["TRUE", "TRUE"] #for test
+                #track_flag = self.ctrl.read_track()
                 #wait track
                 while track_flag[0] == "FALSE" or track_flag[1] == "FALSE":
                     time.sleep(0.5)
                     track_flag = self.ctrl.read_track()
+                    continue
+                
                 status = self.ctrl.read_status()
                 tv = time.time()
                 mjd2 = tv/24./3600. + 40587.0
