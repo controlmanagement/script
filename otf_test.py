@@ -69,19 +69,19 @@ class otf(object):
             coord_mode = 0
             pass
         lamda = c/(float(param[39])*math.pow(10, 6))
-        line_point = float(param[17])/float(param[15]) #scan point for 1line
-        if line_point > int(line_point):
+        param[17] = param[17].lstrip('exposure*')
+        scan_point = float(param[17]) #scan point for 1line
+        if scan_point > int(scan_point):
             print("!!ERROR scan number!!")
             return
         print("coord_sys = "+coord_sys)
         total_count = int(param[19])
-        param[17] = param[17].lstrip('exposure*')
-        scan_length = int(param[17])
         
         
         for scan_count in range(total_count):
             #OFF data
             print(coord_sys, param)
+            print("scan_point:"+str(scan_point))
             if coord_sys == "EQUATRIAL":
                 self.antenna.radec_move(float(param[4]), float(param[5]), coord_mode, float(param[20]), float(param[21]), hosei)
                 time.sleep(0.1)
@@ -124,8 +124,8 @@ class otf(object):
                 sy = float(param[3]) + float(param[13])/3600.
             self.antenna.otf_tracking_end()
             stime = (40587 + time.time()/(24.*3600.))+(0+rampt)/24./3600. # 0 = delay ,for test
-            self.antenna.otf_start(sx, sy, 0, coord_sys, dx, dy, dt, scan_length, rampt, 0, lamda, hosei, coord_mode)
-            self.rx.oneshot_dfs(line_point, param[15], 0)
+            self.antenna.otf_start(sx, sy, 0, coord_sys, dx, dy, dt, scan_point, rampt, 0, lamda, hosei, coord_mode)
+            self.rx.oneshot_dfs(scan_point, float(param[15]), 0)
             
             print("line:"+str(scan_count+1))
             
