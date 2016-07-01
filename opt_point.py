@@ -21,23 +21,19 @@ class opt_point_controller(object):
         return
     
     def calc_star_azel(self, ra, dec, mjd):
-        ret = slalib.sla_map(ra, dec, 0, 0, 0, 0, 2000, mjd + (self.tai_utc + 32.184)/(24.*3600.))
-        """
-        ret[0] = apparent_ra
-        ret[1] = apparent_dec
-        """
-        ret = slalib.sla_aop(ret[0], ret[1], mjd, self.dut1, -67.70308139*math.pi/180, -22.96995611*math.pi/180, 4863.85, 0, 0, 283, 500, 0.1, 2000, tlr=0.0065)
-        """
-        ret[0] = azimath(radian, N=0, E=90)
-        ret[1] = zenith(radian)
-        """
-        #From zenith angle to elevation(degree)
-        real_az = ret[0]
-        real_el = math.pi/2. - ret[1]
-        real_az = real_az*180./math.pi
-        real_el = real_el*180./math.pi
-        return [real_az, real_el]
-    
+	 ra = ra*math.pi/180.
+	 dec = dec*math.pi/180.
+	 
+	 ret = slalib.sla_map(ra, dec, 0, 0, 0, 0, 2000, mjd + (self.tai_utc + 32.184)/(24.*3600.))
+	 ret = list(ret)
+	 ret = slalib.sla_aop(ret[0], ret[1], mjd, self.dut1, -67.70308139*math.pi/180, -22.96995611*math.pi/180, 4863.85, 0, 0, 283, 500, 0.1, 2000, tlr=0.0065)
+	 real_az = ret[0]
+	 real_el = math.pi/2. - ret[1]
+		
+	 real_az = real_az*180./math.pi
+	 real_el = real_el*180./math.pi
+	 return [real_az, real_el]
+   
     def create_table(self):
         #create target_list
         
@@ -126,7 +122,7 @@ class opt_point_controller(object):
             
             if real_el >= 30. and real_el <= 80.:
                 #self.ctrl.radec_move(table[i][1], table[i][2], "J2000")
-                
+                print(table[i][1], table[i][2])
                 print(ret)
                 
                 track_flag = ["TRUE", "TRUE"] #for test
@@ -141,7 +137,7 @@ class opt_point_controller(object):
                 tv = time.time()
                 mjd2 = tv/24./3600. + 40587.0
                 n_star = self.calc_star_azel(table[i][1], table[i][2], mjd2)
-                self.ccd.all_sky_shot(table[i][0], table[i][3], n_star[0], n_star[1], data_name, status)
+                #self.ccd.all_sky_shot(table[i][0], table[i][3], n_star[0], n_star[1], data_name, status)
             else:
                 #out of range(El)
                 pass
