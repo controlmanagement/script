@@ -137,6 +137,11 @@ class opt_point_controller(object):
                     continue
                 
                 status = self.ctrl.read_status()
+                while abs(status["Current_Dome"] - ret[0]) > 10.:
+                    time.sleep(0.5)
+                    status = self.ctrl.read_status()
+                    continue
+                
                 tv = time.time()
                 mjd2 = tv/24./3600. + 40587.0
                 n_star = self.calc_star_azel(table[i][1], table[i][2], mjd2)
