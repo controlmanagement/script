@@ -26,7 +26,7 @@ class opt_point_controller(object):
 	 
 	 ret = slalib.sla_map(ra, dec, 0, 0, 0, 0, 2000, mjd + (self.tai_utc + 32.184)/(24.*3600.))
 	 ret = list(ret)
-	 ret = slalib.sla_aop(ret[0], ret[1], mjd, self.dut1, -67.70308139*math.pi/180, -22.96995611*math.pi/180, 4863.85, 0, 0, 283, 500, 0.1, 2000, tlr=0.0065)
+	 ret = slalib.sla_aop(ret[0], ret[1], mjd, self.dut1, -67.70308139*math.pi/180, -22.96995611*math.pi/180, 4863.85, 0, 0, 283, 500, 0.1, 0.5, tlr=0.0065)
 	 real_az = ret[0]
 	 real_el = math.pi/2. - ret[1]
 		
@@ -60,7 +60,7 @@ class opt_point_controller(object):
             list.append(line[0])
             
             #ra,dec(degree)
-            ra = float(line[1])+float(line[2])/60.+float(line[3])/3600.+float(line[4])/3600.*(mjd - mjd2000)/36525.
+            ra = float(line[1])*(360./24.)+float(line[2])*(360./24.)/60.+float(line[3])*(360./24.)/3600.+float(line[4])*(360./24.)/3600.*(mjd - mjd2000)/36525.
             if line[5] == "+":
                 dec = float(line[6])+float(line[7])/60.+float(line[8])/3600.+float(line[9])/3600.*(mjd - mjd2000)/36525.
             else:
@@ -73,8 +73,11 @@ class opt_point_controller(object):
             list.append(ret[0]) #az
             #list = [number, ra, dec, magnitude, az]
             
+            #print(ret[1])
+            print(str(ra)+"  "+str(dec))
             
             if ret[1] >= 30 and ret[1] <= 80:
+                print("============")
                 num = len(target_list)
                 if num == 0:
                     target_list.append(list)
@@ -121,12 +124,12 @@ class opt_point_controller(object):
             real_el = ret[1]
             
             if real_el >= 30. and real_el <= 80.:
-                #self.ctrl.radec_move(table[i][1], table[i][2], "J2000")
+                self.ctrl.radec_move(table[i][1], table[i][2], "J2000")
                 print(table[i][1], table[i][2])
                 print(ret)
                 
-                track_flag = ["TRUE", "TRUE"] #for test
-                #track_flag = self.ctrl.read_track()
+                #track_flag = ["TRUE", "TRUE"] #for test
+                track_flag = self.ctrl.read_track()
                 #wait track
                 while track_flag[0] == "FALSE" or track_flag[1] == "FALSE":
                     time.sleep(0.5)
@@ -137,7 +140,7 @@ class opt_point_controller(object):
                 tv = time.time()
                 mjd2 = tv/24./3600. + 40587.0
                 n_star = self.calc_star_azel(table[i][1], table[i][2], mjd2)
-                #self.ccd.all_sky_shot(table[i][0], table[i][3], n_star[0], n_star[1], data_name, status)
+                self.ccd.all_sky_shot(table[i][0], table[i][3], n_star[0], n_star[1], data_name, status)
             else:
                 #out of range(El)
                 pass
