@@ -124,7 +124,7 @@ class opt_point_controller(object):
             real_el = ret[1]
             
             if real_el >= 30. and real_el <= 80.:
-                self.ctrl.radec_move(table[i][1], table[i][2], "J2000")
+                self.ctrl.radec_move(table[i][1], table[i][2], "J2000", 0, 0, hosei = 'hosei_opt.txt', offcoord = 'HORIZONTAL', lamda = 0.5)
                 print(table[i][1], table[i][2])
                 print(ret)
                 
