@@ -11,7 +11,7 @@ class opt_point_controller(object):
     #reference : ccd.py, imageppm.cpp, imagepgm.cpp
     
     
-    pointing_list = "./pointing.list"
+    pointing_list = "/home/amigos/NECST/soft/core/pointing.list"
     tai_utc = 36.0 # tai_utc=TAI-UTC  2015 July from ftp://maia.usno.navy.mil/ser7/tai-utc.dat
     dut1 = 0.14708
     
