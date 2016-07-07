@@ -149,5 +149,6 @@ class opt_point_controller(object):
             else:
                 #out of range(El)
                 pass
+        self.ctrl.tracking_end()
         print("OBSERVATION END")
         return
