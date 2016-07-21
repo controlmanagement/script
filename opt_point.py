@@ -3,6 +3,8 @@ import time
 import datetime
 import controller
 import core.ccd
+import signal
+import sys
 from pyslalib import slalib
 
 
@@ -15,25 +17,32 @@ class opt_point_controller(object):
     tai_utc = 36.0 # tai_utc=TAI-UTC  2015 July from ftp://maia.usno.navy.mil/ser7/tai-utc.dat
     dut1 = 0.14708
     
+    
     def __init__(self):
         self.ctrl = controller.controller()
         self.ccd = core.ccd.ccd_controller()
         return
     
+    def handler(self, num, flame):
+        print("!!ctrl+C!!")
+        print("STOP MOVING")
+        self.ctrl.tracking_end()
+        sys.exit()
+    
     def calc_star_azel(self, ra, dec, mjd):
-	 ra = ra*math.pi/180.
-	 dec = dec*math.pi/180.
-	 
-	 ret = slalib.sla_map(ra, dec, 0, 0, 0, 0, 2000, mjd + (self.tai_utc + 32.184)/(24.*3600.))
-	 ret = list(ret)
-	 ret = slalib.sla_aop(ret[0], ret[1], mjd, self.dut1, -67.70308139*math.pi/180, -22.96995611*math.pi/180, 4863.85, 0, 0, 283, 500, 0.1, 0.5, tlr=0.0065)
-	 real_az = ret[0]
-	 real_el = math.pi/2. - ret[1]
-		
-	 real_az = real_az*180./math.pi
-	 real_el = real_el*180./math.pi
-	 return [real_az, real_el]
-   
+        ra = ra*math.pi/180.
+        dec = dec*math.pi/180.
+        
+        ret = slalib.sla_map(ra, dec, 0, 0, 0, 0, 2000, mjd + (self.tai_utc + 32.184)/(24.*3600.))
+        ret = list(ret)
+        ret = slalib.sla_aop(ret[0], ret[1], mjd, self.dut1, -67.70308139*math.pi/180, -22.96995611*math.pi/180, 4863.85, 0, 0, 283, 500, 0.1, 0.5, tlr=0.0065)
+        real_az = ret[0]
+        real_el = math.pi/2. - ret[1]
+           
+        real_az = real_az*180./math.pi
+        real_el = real_el*180./math.pi
+        return [real_az, real_el]
+    
     def create_table(self):
         #create target_list
         
@@ -101,6 +110,7 @@ class opt_point_controller(object):
         return target_list
     
     def start_observation(self):
+        signal.signal(signal.SIGINT, self.handler)
         table = self.create_table()
         num = len(table)
         
@@ -152,3 +162,5 @@ class opt_point_controller(object):
         self.ctrl.tracking_end()
         print("OBSERVATION END")
         return
+    
+    
