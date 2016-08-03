@@ -2,7 +2,7 @@ import math
 import time
 import datetime
 import controller
-import core.ccd
+import ccd
 import signal
 import sys
 from pyslalib import slalib
@@ -20,7 +20,7 @@ class opt_point_controller(object):
     
     def __init__(self):
         self.ctrl = controller.controller()
-        self.ccd = core.ccd.ccd_controller()
+        self.ccd = ccd.ccd_client("172.20.0.12", 8010)
         return
     
     def handler(self, num, flame):
@@ -114,6 +114,7 @@ class opt_point_controller(object):
         table = self.create_table()
         num = len(table)
         
+        self.ctrl.dome_track()
         print(table)
         
         date = datetime.datetime.today()
