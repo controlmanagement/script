@@ -156,6 +156,9 @@ class opt_point_controller(object):
                 while abs(dome_az - target_az) > 10.:
                     time.sleep(0.5)
                     status = self.ctrl.read_status()
+                    dome_az = status["Current_Dome"]
+                    if dome_az < 0.:
+                        dome_az += 360.
                     continue
                 
                 tv = time.time()
