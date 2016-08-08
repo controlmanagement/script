@@ -138,7 +138,7 @@ while num < n:
         ant_az = status["Current_Az"]
         if ant_az < 0.:
             ant_az += 360.
-        while abs(dome_az - ant_az) > 10.:
+        while abs(dome_az - ant_az) > 3. and abs(dome_az - ant_az) > 357.:
             time.sleep(0.5)
             status = self.ctrl.read_status()
             dome_az = status["Current_Dome"]
