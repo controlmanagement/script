@@ -39,6 +39,10 @@ if args.tau is not None: tau = args.tau
 import os
 import time
 import numpy
+import sys
+sys.path.append("/home/amigos/RX_system/base_param")
+import doppler_nante
+dp = doppler_nanten.doppler_nanten()
 
 obs_items = open(obsfile, 'r').read().split('\n')
 obs = {}
@@ -56,11 +60,24 @@ for _item in obs_items:
         pass
     continue
 
-integ = obs['exposure']
+integ_on = obs['exposure']
+integ_off = obs['exposure_off']
 ra = obs['lambda_on']#on点x座標
 dec = obs['beta_on']#on点y座標
 offx = obs['lambda_off']#off点x座標
 offy = obs['beta_off']#off点y座標
+if obs['otadel'].lower() == 'y':
+    offset_dcos = 1
+else:
+    offset_dcos = 0
+if obs['coordsys'].lower() == 'j2000' or 'b1950':
+    coord_sys = 'EQUATRIAL'
+    move = con.radec_move
+else:
+    coord_sys = 'GALACTIC'
+    move = con.galactic_move
+    pass
+
 
 import controller
 con = controller.controller()
@@ -101,7 +118,7 @@ sobsmode_list = []
 mjd_list = []
 secofday_list = []
 subref_list = []
-
+_2NDLO_list = []
 
 print('Start experimentation')
 print('')
@@ -116,13 +133,14 @@ while num < n:
     print('tracking start')
     con.tracking_end()
         
-    con.radec_move(ra, dec, obs['coordsys'], off_x=offx, off_y=offy)
+    move(offx, offy, obs['coordsys'], off_x=offx, off_y=offy)
     print('moving...')
     while not con.read_track():
         time.sleep(0.001)
         continue
     print('tracking OK')
     _now = time.time()
+    dp1 = 0
     if _now > latest_hottime+60*obs['load_interval']:
         print('R')
         con.move_hot('in')
@@ -132,7 +150,8 @@ while num < n:
         print('Temp: %.2f'%(temp))
         
         print('get spectrum...')
-        d = con.oneshot(exposure=integ)
+        dp1 = dp.set_track(obs['lambda_on'], obs['beta_on'], obs['coordsys'], obs['vlsr'], obs['lamdel'], obs['betdel'], offset_dcos, obs['coordsys'], integ_off*2+integ_on)
+        d = con.oneshot(exposure=integ_off)
         d1 = d['dfs1'][0]
         d2 = d['dfs2'][0]
         d1_list.append(d1)
@@ -140,8 +159,8 @@ while num < n:
         tdim6_list.append([16384,1,1])
         date_list.append(con.read_status()['Time'])
         thot_list.append(temp)
-        vframe_list.append(0)
-        vframe2_list.append(0)
+        vframe_list.append(dp1[0])
+        vframe2_list.append(dp1[0])
         lst_list.append(con.read_status()['LST'])
         az_list.append(con.read_status()['Current_Az'])
         el_list.append(con.read_status()['Current_El'])
@@ -158,15 +177,20 @@ while num < n:
         latest_hottime = time.time()
         P_hot = numpy.sum(d1)
         tsys_list.append(0)
+        _2NDLO_list.append(dp1[3])
         pass
 
 
     print('OFF')
     con.move_hot('out')
-        
+    
     print('get spectrum...')
+    if dp1 == 0:
+        dp1 = dp.set_track(obs['lambda_on'], obs['beta_on'], obs['coordsys'], obs['vlsr'], obs['lamdel'], obs['betdel'], offset_dcos, obs['coordsys'], integ_off+integ_on)
+    else:
+        pass
     temp = float(con.read_status()['CabinTemp1']) + 273.15
-    d = con.oneshot(exposure=integ)
+    d = con.oneshot(exposure=integ_off)
     d1 = d['dfs1'][0]
     d2 = d['dfs2'][0]
     d1_list.append(d1)
@@ -174,8 +198,8 @@ while num < n:
     tdim6_list.append([16384,1,1])
     date_list.append(con.read_status()['Time'])
     thot_list.append(temp)
-    vframe_list.append(0)
-    vframe2_list.append(0)
+    vframe_list.append(dp1[0])
+    vframe2_list.append(dp1[0])
     lst_list.append(con.read_status()['LST'])
     az_list.append(con.read_status()['Current_Az'])
     el_list.append(con.read_status()['Current_El'])
@@ -192,12 +216,13 @@ while num < n:
     P_sky = numpy.sum(d1)
     tsys = temp/(P_hot/P_sky-1)
     tsys_list.append(tsys)
-
+    _2NDLO_list.append(dp1[3])
+    
 
     print('move ON')
     con.tracking_end()
         
-    con.radec_move(ra, dec, obs['coordsys'], off_x=offx, off_y=offy)
+    move(ra, dec, obs['coordsys'], off_x=offx, off_y=offy)
     
     while not con.read_track():
         time.sleep(0.001)
@@ -216,8 +241,8 @@ while num < n:
     tdim6_list.append([16384,1,1])
     date_list.append(con.read_status()['Time'])
     thot_list.append(temp)
-    vframe_list.append(0)
-    vframe2_list.append(0)
+    vframe_list.append(dp1[0])
+    vframe2_list.append(dp1[0])
     lst_list.append(con.read_status()['LST'])
     az_list.append(con.read_status()['Current_Az'])
     el_list.append(con.read_status()['Current_El'])
@@ -232,7 +257,7 @@ while num < n:
     secofday_list.append(con.read_status()['Secofday'])
     subref_list.append(con.read_status()['Current_M2'])
     tsys_list.append(tsys)
-        
+    _2NDLO_list.append(dp1[3])    
         
     print('stop')
     con.tracking_end()
@@ -262,6 +287,7 @@ sobsmode_list = numpy.array(sobsmode_list)
 mjd_list = numpy.array(mjd_list)
 secofday_list = numpy.array(secofday_list)
 subref_list = numpy.array(subref_list)
+_2NDLO_list = numpy.array(_2NDLO_list)
 
 if obs['lo1st_sb_1'] == 'U':
     ul = -1
@@ -384,7 +410,7 @@ read1 = {
     "SIDEBAND" : obs['lo1st_sb_1'],
     "_2NDSB" : obs['lo2nd_sb_1'],
     "_3RDSB" : obs['lo3rd_sb_1'],
-    "_2NDLO" : 8038.000000000,#要調査['SYNTH']
+    "_2NDLO" : _2NDLO_list[0],#要調査['SYNTH']
     "_3RDLO" : obs['lo3rd_freq_1'],
     "SUBREF" : subref_list,
     "LOCKSTAT" : 'F'#未使用
@@ -462,7 +488,7 @@ read2 = {
     "SIDEBAND" : obs['lo1st_sb_2'],
     "_2NDSB" : obs['lo2nd_sb_2'],
     "_3RDSB" : obs['lo3rd_sb_2'],
-    "_2NDLO" : 8038.000000000,#要調査['SYNTH']                                  
+    "_2NDLO" : _2NDLO_list[1],#ドップラーシフト込み                                  
     "_3RDLO" : obs['lo3rd_freq_2'],
     "SUBREF" : subref_list,
     "LOCKSTAT" : 'F'#未使用                                                    
