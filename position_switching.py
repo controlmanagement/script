@@ -133,7 +133,7 @@ while num < n:
     print('tracking start')
     con.tracking_end()
         
-    move(offx, offy, obs['coordsys'], off_x=offx, off_y=offy)
+    move(offx, offy, obs['coordsys'], off_x=obs['lamdel_off'], off_y=obs['betdel_off'])
     print('moving...')
     while not con.read_track():
         time.sleep(0.001)
@@ -222,7 +222,7 @@ while num < n:
     print('move ON')
     con.tracking_end()
         
-    move(ra, dec, obs['coordsys'], off_x=offx, off_y=offy)
+    move(ra, dec, obs['coordsys'], off_x=obs['lamdel_off'], off_y=obs['betdel_off'])
     
     while not con.read_track():
         time.sleep(0.001)
