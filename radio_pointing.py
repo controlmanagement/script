@@ -20,7 +20,6 @@ tau = 0.0
 # Argument handler
 # ================
 
-#編集中
 import argparse
 
 p = argparse.ArgumentParser(description=description)
@@ -37,8 +36,16 @@ if args.tau is not None: tau = args.tau
 # Main
 # ====
 import os
+import sys
 import time
+import signal
 import numpy
+
+tstmp = time.strftime("%H%M%S")
+daystmp = time.strftime("%Y%m%d")
+f = open("./data/obs_log/"+daystmp+".txt", "a")
+f.write(tstmp+" radio_pointing.py "+obsfile+"\n")
+f.close()
 
 obs_items = open(obsfile, 'r').read().split('\n')
 obs = {}
@@ -51,9 +58,13 @@ for _item in obs_items:
     _value = _value.strip()
     try:
         obs[_key] = eval(_value)
-    except NameError:
-        obs[_key] = obs[_value]
-        pass
+    #except NameError:
+    except:
+        try:
+            obs[_key] = eval(_value, obs)
+        except:
+            obs[_key] = obs[_value]
+            pass
     continue
 
 integ = obs['exposure']
@@ -69,6 +80,15 @@ point_n = int(point_n / 2) + 1 #number of 1line
 
 import controller
 con = controller.controller()
+
+
+def handler(num, flame):
+    con.tracking_end()
+    print("!!ctrl + c!!")
+    print("Stop antenna")
+    sys.exit()
+
+signal.signal(signal.SIGINT, handler)
 
 # Initial configurations
 # ----------------------
@@ -108,27 +128,53 @@ secofday_list = []
 subref_list = []
 
 
-print('Start experimentation')
+print('Start pointing')
 print('')
 
 savetime = con.read_status()['Time']
 num = 0
-p_n = 0
 n = int(obs['nTest']) * 2
 latest_hottime = 0
+
+
+#for debug
+print("xgrid:"+str(xgrid))
+print("ygrid:"+str(ygrid))
+print("n:"+str(n))
+print("point_n:"+str(point_n))
+
+
+
 while num < n:
+    p_n = 0
     while p_n < point_n:
-        if n % 2 == 1:
+        ra = obs['lambda_on']
+        dec = obs['beta_on']
+        
+        
+        print("num "+str(num))
+        print("p_n "+str(p_n))
+        
+        
+        if num % 2 == 1:
             ra += xgrid / 3600. * (p_n - (int(point_n/2)))
         else:
             dec += ygrid / 3600. * (p_n - (int(point_n/2)))
+        
+        
+        
+        print("ra:"+str(ra))
+        print("dec:"+str(dec))
+        
+        
+        
         print('observation :'+str(num))
         print('tracking start')
         con.tracking_end()
         con.radec_move(ra, dec, obs['coordsys'], off_x=offx, off_y=offy)
         print('moving...')
         while not con.read_track():
-            time.sleep(0.001)
+            time.sleep(0.1)
             continue
         
         status = con.read_status()
@@ -144,7 +190,7 @@ while num < n:
             dome_az = status["Current_Dome"]
             if dome_az < 0.:
                 dome_az += 360.
-            continue
+        p_n += 1
         
         print('tracking OK')
         _now = time.time()
@@ -188,7 +234,14 @@ while num < n:
         
         print('OFF')
         con.move_hot('out')
-            
+        con.radec_move(offx, offy, obs['coordsys'])
+        
+        while not con.read_track():
+            time.sleep(0.1)
+            continue
+        print('tracking OK')
+        
+        
         print('get spectrum...')
         temp = float(con.read_status()['CabinTemp1']) + 273.15
         d = con.oneshot(exposure=integ)
@@ -222,10 +275,10 @@ while num < n:
         print('move ON')
         con.tracking_end()
         
-        con.radec_move(ra, dec, obs['coordsys'], off_x=offx, off_y=offy)
+        con.radec_move(ra, dec, obs['coordsys'])
         
         while not con.read_track():
-            time.sleep(0.001)
+            time.sleep(0.1)
             continue
         print('tracking OK')
         
@@ -262,10 +315,16 @@ while num < n:
         print('stop')
         con.tracking_end()
             
-        num += 1
-        continue
+    num += 1
 
-#いらないかも
+
+print("====test======")
+print("num:"+str(num))
+print("p_n:"+str(p_n))
+
+
+
+#???
 d1_list = numpy.array(d1_list)
 d2_list = numpy.array(d2_list)
 tdim6_list = numpy.array(tdim6_list)
@@ -396,8 +455,8 @@ read1 = {
     "FREQSWAM" : 0,#要調査
     "COORDSYS" : obs['coordsys'],
     "COSYDEL" : obs['cosydel'],
-    "LAMDEL" : obs['lamdel'],
-    "BETDEL" : obs['betdel'],
+    "LAMDEL" : 0,
+    "BETDEL" : 0,
     "OTADEL" : obs['otadel'],
     "OTFVLAM" : 0,
     "OTFVBET" : 0,
@@ -474,8 +533,8 @@ read2 = {
     "FREQSWAM" : 0,#要調査                                                     
     "COORDSYS" : obs['coordsys'],
     "COSYDEL" : obs['cosydel'],
-    "LAMDEL" : obs['lamdel'],
-    "BETDEL" : obs['betdel'],
+    "LAMDEL" : 0,
+    "BETDEL" : 0,
     "OTADEL" : obs['otadel'],
     "OTFVLAM" : 0,
     "OTFVBET" : 0,
@@ -497,8 +556,6 @@ read2 = {
 
 f1 = os.path.join(savedir,'n2ps_%s_IF1.fits'%(timestamp))
 f2 = os.path.join(savedir,'n2ps_%s_IF2.fits'%(timestamp))
-numpy.save(f1+".npy",read1)
-numpy.save(f2+".npy",read2)
 
 import n2fits_write
 n2fits_write.write(read1,f1)
