@@ -40,9 +40,19 @@ import os
 import time
 import numpy
 import sys
-sys.path.append("/home/amigos/RX_system/base_param")
-import doppler_nante
+sys.path.append("/home/amigos/NECRX_system/base_param")
+import doppler_nanten
 dp = doppler_nanten.doppler_nanten()
+import controller
+con = controller.controller()
+import signal
+def handler(num, flame):
+    print("!!ctrl+C!!")
+    print("STOP MOVING")
+    con.tracking_end()
+    sys.exit()
+signal.signal(signal.SIGINT, handler)
+
 
 obs_items = open(obsfile, 'r').read().split('\n')
 obs = {}
@@ -77,10 +87,15 @@ else:
     coord_sys = 'GALACTIC'
     move = con.galactic_move
     pass
+if obs['lo1st_sb_1'] == 'U':#後半に似たのがあるけど気にしない()                 
+    sb1 = -1
+else:
+    sb1 = 1
+if obs['lo1st_sb_2'] == 'U':#後半に似たのがあるけど気にしない()                 
+    sb2 = -1
+else:
+    sb2 = 1  
 
-
-import controller
-con = controller.controller()
 
 # Initial configurations
 # ----------------------
@@ -150,7 +165,8 @@ while num < n:
         print('Temp: %.2f'%(temp))
         
         print('get spectrum...')
-        dp1 = dp.set_track(obs['lambda_on'], obs['beta_on'], obs['coordsys'], obs['vlsr'], obs['lamdel'], obs['betdel'], offset_dcos, obs['coordsys'], integ_off*2+integ_on)
+        dp1 = dp.set_track(obs['lambda_on'], obs['beta_on'], obs['vlsr'], obs['coordsys'], obs['lamdel'], obs['betdel'], offset_dcos, obs['coordsys'], integ_off*2+integ_on, obs['restfreq_1']/1000., obs['restfreq_2']/1000., sb1, sb2, 8038.000000000/1000., 9301.318999999/1000.)
+        #lambel_off,betdel_offかも？SYNTHが固定値の場合
         d = con.oneshot(exposure=integ_off)
         d1 = d['dfs1'][0]
         d2 = d['dfs2'][0]
@@ -186,7 +202,8 @@ while num < n:
     
     print('get spectrum...')
     if dp1 == 0:
-        dp1 = dp.set_track(obs['lambda_on'], obs['beta_on'], obs['coordsys'], obs['vlsr'], obs['lamdel'], obs['betdel'], offset_dcos, obs['coordsys'], integ_off+integ_on)
+        dp1 = dp.set_track(obs['lambda_on'], obs['beta_on'], obs['vlsr'], obs['coordsys'], obs['lamdel'], obs['betdel'], offset_dcos, obs['coordsys'], integ_off+integ_on, obs['restfreq_1']/1000., obs['restfreq_2']/1000., sb1, sb2, 8038.000000000/1000., 9301.318999999/1000.)
+        #lambel_off,betdel_offかも？SYNTHが固定値の場合
     else:
         pass
     temp = float(con.read_status()['CabinTemp1']) + 273.15
@@ -233,7 +250,7 @@ while num < n:
 
     print('get spectrum...')
     temp = float(con.read_status()['CabinTemp1']) + 273.15
-    d = con.oneshot(exposure=integ)
+    d = con.oneshot(exposure=integ_on)
     d1 = d['dfs1'][0]
     d2 = d['dfs2'][0]
     d1_list.append(d1)
