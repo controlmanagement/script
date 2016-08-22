@@ -529,7 +529,7 @@ read2 = {
     "QUALITY" : 1, #未使用                                                     
     "AOSLEN" : 0.04, #未使用                                                   
     "LOFREQ" : lofreq2, #要計算                                                
-    "SYNTH" : 8038.000000000,#要調査[MHz;IF1]2ndLO                             
+    "SYNTH" : 9301.318999999,#要調査[MHz;IF2]2ndLO                             
     "FREQSWAM" : 0,#要調査                                                     
     "COORDSYS" : obs['coordsys'],
     "COSYDEL" : obs['cosydel'],
