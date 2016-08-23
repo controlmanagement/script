@@ -74,8 +74,8 @@ offx = obs['lambda_off']#off点x座標
 offy = obs['beta_off']#off点y座標
 xgrid = obs["xgrid"] #offset of pointing(x)
 ygrid = obs["ygrid"] #offset of pointing(y)
-point_n = obs["N"] #number of pointing
-point_n = int(point_n / 2) + 1 #number of 1line
+point_n = obs["N"] #number of line
+#point_n = int(point_n / 2) + 1 #number of 1line
 
 
 import controller
