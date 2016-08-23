@@ -133,7 +133,8 @@ sobsmode_list = []
 mjd_list = []
 secofday_list = []
 subref_list = []
-_2NDLO_list = []
+_2NDLO_list1 = []
+_2NDLO_list2 = []
 
 print('Start experimentation')
 print('')
@@ -193,7 +194,8 @@ while num < n:
         latest_hottime = time.time()
         P_hot = numpy.sum(d1)
         tsys_list.append(0)
-        _2NDLO_list.append(dp1[3])
+        _2NDLO_list1.append(dp1[3]['sg21'])
+        _2NDLO_list2.append(dp1[3]['sg22'])
         pass
 
 
@@ -233,8 +235,9 @@ while num < n:
     P_sky = numpy.sum(d1)
     tsys = temp/(P_hot/P_sky-1)
     tsys_list.append(tsys)
-    _2NDLO_list.append(dp1[3])
-    
+    _2NDLO_list1.append(dp1[3]['sg21'])
+    _2NDLO_list2.append(dp1[3]['sg22'])
+
 
     print('move ON')
     con.tracking_end()
@@ -274,8 +277,9 @@ while num < n:
     secofday_list.append(con.read_status()['Secofday'])
     subref_list.append(con.read_status()['Current_M2'])
     tsys_list.append(tsys)
-    _2NDLO_list.append(dp1[3])    
-        
+    _2NDLO_list1.append(dp1[3]['sg21'])    
+    _2NDLO_list2.append(dp1[3]['sg22'])
+
     print('stop')
     con.tracking_end()
         
@@ -304,7 +308,8 @@ sobsmode_list = numpy.array(sobsmode_list)
 mjd_list = numpy.array(mjd_list)
 secofday_list = numpy.array(secofday_list)
 subref_list = numpy.array(subref_list)
-_2NDLO_list = numpy.array(_2NDLO_list)
+_2NDLO_list1 = numpy.array(_2NDLO_list1)
+_2NDLO_list2 = numpy.array(_2NDLO_list2)
 
 if obs['lo1st_sb_1'] == 'U':
     ul = -1
@@ -427,7 +432,7 @@ read1 = {
     "SIDEBAND" : obs['lo1st_sb_1'],
     "_2NDSB" : obs['lo2nd_sb_1'],
     "_3RDSB" : obs['lo3rd_sb_1'],
-    "_2NDLO" : _2NDLO_list[0],#要調査['SYNTH']
+    "_2NDLO" : _2NDLO_list1,#要調査['SYNTH']
     "_3RDLO" : obs['lo3rd_freq_1'],
     "SUBREF" : subref_list,
     "LOCKSTAT" : 'F'#未使用
@@ -505,7 +510,7 @@ read2 = {
     "SIDEBAND" : obs['lo1st_sb_2'],
     "_2NDSB" : obs['lo2nd_sb_2'],
     "_3RDSB" : obs['lo3rd_sb_2'],
-    "_2NDLO" : _2NDLO_list[1],#ドップラーシフト込み                                  
+    "_2NDLO" : _2NDLO_list2,#ドップラーシフト込み                                  
     "_3RDLO" : obs['lo3rd_freq_2'],
     "SUBREF" : subref_list,
     "LOCKSTAT" : 'F'#未使用                                                    
