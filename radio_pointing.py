@@ -94,7 +94,7 @@ signal.signal(signal.SIGINT, handler)
 # ----------------------
 
 datahome = 'data'
-timestamp = time.strftime('%Y%m%d_%H%M%S')
+timestamp = time.strftime('%Y%m%d%H%M%S')
 dirname = timestamp
 savedir = os.path.join(datahome, name, dirname)
 
@@ -554,8 +554,8 @@ read2 = {
 
 
 
-f1 = os.path.join(savedir,'n2ps_%s_IF1.fits'%(timestamp))
-f2 = os.path.join(savedir,'n2ps_%s_IF2.fits'%(timestamp))
+f1 = os.path.join(savedir,'n%s_%s_%s_cross_%s_pointing.fits'%(timestamp ,obs['molecule_1'] ,obs['transiti_1'],obs['object']))
+f2 = os.path.join(savedir,'n%s_%s_%s_cross_%s_pointing.fits'%(timestamp ,obs['molecule_2'] ,obs['transiti_2'],obs['object']))
 
 import n2fits_write
 n2fits_write.write(read1,f1)
