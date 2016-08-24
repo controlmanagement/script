@@ -158,18 +158,14 @@ while num < n:
         print("p_n "+str(p_n))
         
         
-        lamdel_list.append(0)
-        betdel_list.append(0)
-        
-        
         if num % 2 == 1:
             ra += xgrid / 3600. * (p_n - (int(point_n/2)))
-            lamdel_list.append(xgrid / 3600. * (p_n - (int(point_n/2))))
-            betdel_list.append(0)
+            #lamdel_list.append(xgrid * (p_n - (int(point_n/2))))
+            #betdel_list.append(0)
         else:
             dec += ygrid / 3600. * (p_n - (int(point_n/2)))
-            lamdel_list.append(0)
-            betdel_list.append(ygrid / 3600. * (p_n - (int(point_n/2))))
+            #lamdel_list.append(0)
+            #betdel_list.append(ygrid * (p_n - (int(point_n/2))))
         
         
         
@@ -183,6 +179,7 @@ while num < n:
         con.tracking_end()
         con.radec_move(ra, dec, obs['coordsys'], off_x=offx, off_y=offy)
         print('moving...')
+        
         while not con.read_track():
             time.sleep(0.1)
             continue
@@ -199,10 +196,7 @@ while num < n:
             dome_az = status["Current_Dome"]
             if dome_az < 0.:
                 dome_az += 360.
-            ant_az = status["Current_Az"]
-            if ant_az < 0.:
-                ant_az += 360.
-        
+
         p_n += 1
         
         print('tracking OK')
@@ -267,10 +261,7 @@ while num < n:
             dome_az = status["Current_Dome"]
             if dome_az < 0.:
                 dome_az += 360.
-            ant_az = status["Current_Az"]
-            if ant_az < 0.:
-                ant_az += 360.
-        
+
         print('tracking OK')
         
         
@@ -302,7 +293,8 @@ while num < n:
         P_sky = numpy.sum(d1)
         tsys = temp/(P_hot/P_sky-1)
         tsys_list.append(tsys)
-        
+        lamdel_list.append(0)
+        betdel_list.append(0)
         
         print('move ON')
         con.tracking_end()
@@ -325,10 +317,7 @@ while num < n:
             dome_az = status["Current_Dome"]
             if dome_az < 0.:
                 dome_az += 360.
-            ant_az = status["Current_Az"]
-            if ant_az < 0.:
-                ant_az += 360.
-        
+
         print('tracking OK')
         
         print('ON')     
@@ -359,7 +348,14 @@ while num < n:
         secofday_list.append(con.read_status()['Secofday'])
         subref_list.append(con.read_status()['Current_M2'])
         tsys_list.append(tsys)
-            
+        if num % 2 == 1:
+            #ra += xgrid / 3600. * (p_n - (int(point_n/2)))
+            lamdel_list.append(xgrid * (p_n - (int(point_n/2))))
+            betdel_list.append(0)
+        else:
+            #dec += ygrid / 3600. * (p_n - (int(point_n/2)))
+            lamdel_list.append(0)
+            betdel_list.append(ygrid * (p_n - (int(point_n/2))))    
             
         print('stop')
         con.tracking_end()
