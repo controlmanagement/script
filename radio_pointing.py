@@ -95,7 +95,7 @@ signal.signal(signal.SIGINT, handler)
 
 datahome = 'data'
 timestamp = time.strftime('%Y%m%d%H%M%S')
-dirname = timestamp
+dirname = 'n%s_%s_%s_cross_%s_pointing'%(timestamp ,obs['molecule_1'] ,obs['transiti_1'].split('=')[1],obs['object'])
 savedir = os.path.join(datahome, name, dirname)
 
 print('mkdir {savedir}'.format(**locals()))
@@ -197,7 +197,7 @@ while num < n:
             if dome_az < 0.:
                 dome_az += 360.
 
-        p_n += 1
+        #p_n += 1
         
         print('tracking OK')
         _now = time.time()
@@ -359,7 +359,8 @@ while num < n:
             
         print('stop')
         con.tracking_end()
-            
+        
+        p_n += 1    
     num += 1
 
 
@@ -605,5 +606,6 @@ f2 = os.path.join(savedir,'n%s_%s_%s_cross_%s_pointing.fits'%(timestamp ,obs['mo
 import n2fits_write
 n2fits_write.write(read1,f1)
 n2fits_write.write(read2,f2)
+
 
 
