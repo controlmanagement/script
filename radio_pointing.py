@@ -116,6 +116,8 @@ vframe2_list = []
 lst_list = []
 az_list = []
 el_list = []
+lamdel_list = []
+betdel_list = []
 tau_list = []
 hum_list = []
 tamb_list = []
@@ -156,10 +158,18 @@ while num < n:
         print("p_n "+str(p_n))
         
         
+        lamdel_list.append(0)
+        betdel_list.append(0)
+        
+        
         if num % 2 == 1:
             ra += xgrid / 3600. * (p_n - (int(point_n/2)))
+            lamdel_list.append(xgrid / 3600. * (p_n - (int(point_n/2))))
+            betdel_list.append(0)
         else:
             dec += ygrid / 3600. * (p_n - (int(point_n/2)))
+            lamdel_list.append(0)
+            betdel_list.append(ygrid / 3600. * (p_n - (int(point_n/2))))
         
         
         
@@ -176,7 +186,6 @@ while num < n:
         while not con.read_track():
             time.sleep(0.1)
             continue
-        
         status = con.read_status()
         dome_az = status["Current_Dome"]
         if dome_az < 0.:
@@ -190,6 +199,10 @@ while num < n:
             dome_az = status["Current_Dome"]
             if dome_az < 0.:
                 dome_az += 360.
+            ant_az = status["Current_Az"]
+            if ant_az < 0.:
+                ant_az += 360.
+        
         p_n += 1
         
         print('tracking OK')
@@ -208,6 +221,8 @@ while num < n:
             d2 = d['dfs2'][0]
             d1_list.append(d1)
             d2_list.append(d2)
+            lamdel_list.append(0)
+            betdel_list.append(0)
             tdim6_list.append([16384,1,1])
             date_list.append(con.read_status()['Time'])
             thot_list.append(temp)
@@ -239,6 +254,23 @@ while num < n:
         while not con.read_track():
             time.sleep(0.1)
             continue
+        status = con.read_status()
+        dome_az = status["Current_Dome"]
+        if dome_az < 0.:
+            dome_az += 360.
+        ant_az = status["Current_Az"]
+        if ant_az < 0.:
+            ant_az += 360.
+        while abs(dome_az - ant_az) > 3. and abs(dome_az - ant_az) < 357.:
+            time.sleep(0.5)
+            status = con.read_status()
+            dome_az = status["Current_Dome"]
+            if dome_az < 0.:
+                dome_az += 360.
+            ant_az = status["Current_Az"]
+            if ant_az < 0.:
+                ant_az += 360.
+        
         print('tracking OK')
         
         
@@ -280,6 +312,23 @@ while num < n:
         while not con.read_track():
             time.sleep(0.1)
             continue
+        status = con.read_status()
+        dome_az = status["Current_Dome"]
+        if dome_az < 0.:
+            dome_az += 360.
+        ant_az = status["Current_Az"]
+        if ant_az < 0.:
+            ant_az += 360.
+        while abs(dome_az - ant_az) > 3. and abs(dome_az - ant_az) < 357.:
+            time.sleep(0.5)
+            status = con.read_status()
+            dome_az = status["Current_Dome"]
+            if dome_az < 0.:
+                dome_az += 360.
+            ant_az = status["Current_Az"]
+            if ant_az < 0.:
+                ant_az += 360.
+        
         print('tracking OK')
         
         print('ON')     
@@ -455,8 +504,8 @@ read1 = {
     "FREQSWAM" : 0,#要調査
     "COORDSYS" : obs['coordsys'],
     "COSYDEL" : obs['cosydel'],
-    "LAMDEL" : 0,
-    "BETDEL" : 0,
+    "LAMDEL" : lamdel_list,
+    "BETDEL" : betdel_list,
     "OTADEL" : obs['otadel'],
     "OTFVLAM" : 0,
     "OTFVBET" : 0,
@@ -533,8 +582,8 @@ read2 = {
     "FREQSWAM" : 0,#要調査                                                     
     "COORDSYS" : obs['coordsys'],
     "COSYDEL" : obs['cosydel'],
-    "LAMDEL" : 0,
-    "BETDEL" : 0,
+    "LAMDEL" : lamdel_list,
+    "BETDEL" : betdel_list,
     "OTADEL" : obs['otadel'],
     "OTFVLAM" : 0,
     "OTFVBET" : 0,
@@ -546,7 +595,7 @@ read2 = {
     "SIDEBAND" : obs['lo1st_sb_2'],
     "_2NDSB" : obs['lo2nd_sb_2'],
     "_3RDSB" : obs['lo3rd_sb_2'],
-    "_2NDLO" : 8038.000000000,#要調査['SYNTH']                                  
+    "_2NDLO" : 9301.318999999,#要調査['SYNTH']                                  
     "_3RDLO" : obs['lo3rd_freq_2'],
     "SUBREF" : subref_list,
     "LOCKSTAT" : 'F'#未使用                                                    
@@ -554,8 +603,8 @@ read2 = {
 
 
 
-f1 = os.path.join(savedir,'n%s_%s_%s_cross_%s_pointing.fits'%(timestamp ,obs['molecule_1'] ,obs['transiti_1'],obs['object']))
-f2 = os.path.join(savedir,'n%s_%s_%s_cross_%s_pointing.fits'%(timestamp ,obs['molecule_2'] ,obs['transiti_2'],obs['object']))
+f1 = os.path.join(savedir,'n%s_%s_%s_cross_%s_pointing.fits'%(timestamp ,obs['molecule_1'] ,obs['transiti_1'].split('=')[1],obs['object']))
+f2 = os.path.join(savedir,'n%s_%s_%s_cross_%s_pointing.fits'%(timestamp ,obs['molecule_2'] ,obs['transiti_2'].split('=')[1],obs['object']))
 
 import n2fits_write
 n2fits_write.write(read1,f1)
