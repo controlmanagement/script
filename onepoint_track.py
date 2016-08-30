@@ -10,6 +10,7 @@ import ccd
 import coord
 import controller
 import sys
+import obs_log
 
 
 
@@ -57,11 +58,16 @@ if args.duration is not None: duration = args.duration
 # Main
 # ====
 
-tstmp = time.strftime("%H%M%S")
-daystmp = time.strftime("%Y%m%d")
-f = open("./data/obs_log/"+daystmp+".txt", "a")
-f.write(tstmp+" onepoint_track.py "+str(ra)+" "+str(dec)+" "+str(interval)+" "+str(duration)+"\n")
-f.close()
+list = []
+list.append("--ra")
+list.append(ra)
+list.append("--dec")
+list.append(dec)
+list.append("--interval")
+list.append(interval)
+list.append("--duration")
+list.append(duration)
+obs_log.start_script(name, list)
 
 tai_utc = 36.0 # tai_utc=TAI-UTC  2015 July from ftp://maia.usno.navy.mil/ser7/tai-utc.dat
 dut1 = 0.14708
@@ -146,4 +152,4 @@ ctrl.tracking_end()
 ctrl.dome_track_end()
 print("Finish observation")
 
-
+obs_log.end_script(name)
