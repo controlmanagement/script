@@ -7,7 +7,7 @@
 # Info
 # ----
 
-name = 'radio_pointing_line_9'
+name = 'radio_pointing'
 description = 'Do radio pointing'
 
 
@@ -40,12 +40,14 @@ import sys
 import time
 import signal
 import numpy
+import obs_log
 
-tstmp = time.strftime("%H%M%S")
-daystmp = time.strftime("%Y%m%d")
-f = open("./data/obs_log/"+daystmp+".txt", "a")
-f.write(tstmp+" radio_pointing.py "+obsfile+"\n")
-f.close()
+
+list = []
+list.append("--obsfile")
+list.append(obsfile)
+obs_log.start_script(name, list)
+
 
 obs_items = open(obsfile, 'r').read().split('\n')
 obs = {}
@@ -608,4 +610,4 @@ n2fits_write.write(read1,f1)
 n2fits_write.write(read2,f2)
 
 
-
+obs_log.end_script(name)
