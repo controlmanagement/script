@@ -7,7 +7,7 @@
 # Info
 # ----
 
-name = 'radio_pointing'
+name = 'radio_pointing_line_9'
 description = 'Do radio pointing'
 
 
@@ -47,6 +47,7 @@ list = []
 list.append("--obsfile")
 list.append(obsfile)
 obs_log.start_script(name, list)
+
 
 
 obs_items = open(obsfile, 'r').read().split('\n')
@@ -160,7 +161,7 @@ while num < n:
         print("p_n "+str(p_n))
         
         
-        if num % 2 == 1:
+        if num % 2 == 0:
             ra += xgrid / 3600. * (p_n - (int(point_n/2)))
             #lamdel_list.append(xgrid * (p_n - (int(point_n/2))))
             #betdel_list.append(0)
@@ -350,7 +351,7 @@ while num < n:
         secofday_list.append(con.read_status()['Secofday'])
         subref_list.append(con.read_status()['Current_M2'])
         tsys_list.append(tsys)
-        if num % 2 == 1:
+        if num % 2 == 0:
             #ra += xgrid / 3600. * (p_n - (int(point_n/2)))
             lamdel_list.append(xgrid * (p_n - (int(point_n/2))))
             betdel_list.append(0)
@@ -441,7 +442,7 @@ if obs['lo3rd_sb_1'] == 'U':
 else:
     ul2_3 = -1
 ul2 = ul2_1 * ul2_2 * ul2_3
-cdelt2 = ul1*0.079370340319607024 #(km/s)                                      
+cdelt2 = ul2*0.079370340319607024 #(km/s)                                      
 
 dv2 = (300000*cdelt2)/obs['restfreq_2']
 crpix2 = 8191.5 - obs['vlsr']/dv2 - (500-obs['if3rd_freq_2'])/cdelt2
@@ -611,3 +612,4 @@ n2fits_write.write(read2,f2)
 
 
 obs_log.end_script(name)
+
