@@ -41,7 +41,8 @@ import time
 import signal
 import numpy
 import obs_log
-
+import doppler_nanten
+dp = doppler_nanten.doppler_nanten()
 
 list = []
 list.append("--obsfile")
@@ -79,6 +80,18 @@ xgrid = obs["xgrid"] #offset of pointing(x)
 ygrid = obs["ygrid"] #offset of pointing(y)
 point_n = obs["N"] #number of line
 #point_n = int(point_n / 2) + 1 #number of 1line
+if obs['otadel'].lower() == 'y':
+    offset_dcos = 1
+else:
+    offset_dcos = 0
+if obs['lo1st_sb_1'] == 'U':#後半に似たのがあるけど気にしない               
+   sb1 = -1
+else:
+    sb1 = 1
+if obs['lo1st_sb_2'] == 'U':#後半に似たのがあるけど気にしない               
+    sb2 = -1
+else:
+    sb2 = 1  
 
 
 import controller
@@ -131,7 +144,8 @@ sobsmode_list = []
 mjd_list = []
 secofday_list = []
 subref_list = []
-
+_2NDLO_list1 = []
+_2NDLO_list2 = []
 
 print('Start pointing')
 print('')
@@ -213,6 +227,7 @@ while num < n:
             print('Temp: %.2f'%(temp))
             
             print('get spectrum...')
+            dp1 = dp.set_track(obs['lambda_on'], obs['beta_on'], obs['vlsr'], obs['coordsys'], obs['lamdel'], obs['betdel'], offset_dcos, obs['coordsys'], integ_off*2+integ_on, obs['restfreq_1']/1000., obs['restfreq_2']/1000., sb1, sb2, 8038.000000000/1000., 9301.318999999/1000.)
             d = con.oneshot(exposure=integ)
             d1 = d['dfs1'][0]
             d2 = d['dfs2'][0]
@@ -223,8 +238,8 @@ while num < n:
             tdim6_list.append([16384,1,1])
             date_list.append(con.read_status()['Time'])
             thot_list.append(temp)
-            vframe_list.append(0)
-            vframe2_list.append(0)
+            vframe_list.append(dp1[0])
+            vframe2_list.append(dp1[0])
             lst_list.append(con.read_status()['LST'])
             az_list.append(con.read_status()['Current_Az'])
             el_list.append(con.read_status()['Current_El'])
@@ -241,6 +256,8 @@ while num < n:
             latest_hottime = time.time()
             P_hot = numpy.sum(d1)
             tsys_list.append(0)
+            _2NDLO_list1.append(dp1[3]['sg21']*1000)
+            _2NDLO_list2.append(dp1[3]['sg22']*1000)
             pass
         
         
@@ -269,6 +286,10 @@ while num < n:
         
         
         print('get spectrum...')
+        if latest_hottime > _now:
+            pass
+        else:
+            dp1 = dp.set_track(obs['lambda_on'], obs['beta_on'], obs['vlsr'], obs['coordsys'], obs['lamdel'], obs['betdel'], offset_dcos, obs['coordsys'], integ_off+integ_on, obs['restfreq_1']/1000., obs['restfreq_2']/1000., sb1, sb2, 8038.000000000/1000., 9301.318999999/1000.)
         temp = float(con.read_status()['CabinTemp1']) + 273.15
         d = con.oneshot(exposure=integ)
         d1 = d['dfs1'][0]
@@ -278,8 +299,8 @@ while num < n:
         tdim6_list.append([16384,1,1])
         date_list.append(con.read_status()['Time'])
         thot_list.append(temp)
-        vframe_list.append(0)
-        vframe2_list.append(0)
+        vframe_list.append(dp1[0])
+        vframe2_list.append(dp1[0])
         lst_list.append(con.read_status()['LST'])
         az_list.append(con.read_status()['Current_Az'])
         el_list.append(con.read_status()['Current_El'])
@@ -298,6 +319,8 @@ while num < n:
         tsys_list.append(tsys)
         lamdel_list.append(0)
         betdel_list.append(0)
+        _2NDLO_list1.append(dp1[3]['sg21']*1000)
+        _2NDLO_list2.append(dp1[3]['sg22']*1000)
         
         print('move ON')
         con.tracking_end()
@@ -335,8 +358,8 @@ while num < n:
         tdim6_list.append([16384,1,1])
         date_list.append(con.read_status()['Time'])
         thot_list.append(temp)
-        vframe_list.append(0)
-        vframe2_list.append(0)
+        vframe_list.append(dp1[0])
+        vframe2_list.append(dp1[0])
         lst_list.append(con.read_status()['LST'])
         az_list.append(con.read_status()['Current_Az'])
         el_list.append(con.read_status()['Current_El'])
@@ -351,6 +374,8 @@ while num < n:
         secofday_list.append(con.read_status()['Secofday'])
         subref_list.append(con.read_status()['Current_M2'])
         tsys_list.append(tsys)
+        _2NDLO_list1.append(dp1[3]['sg21']*1000)
+        _2NDLO_list2.append(dp1[3]['sg22']*1000)
         if num % 2 == 0:
             #ra += xgrid / 3600. * (p_n - (int(point_n/2)))
             lamdel_list.append(xgrid * (p_n - (int(point_n/2))))
@@ -395,6 +420,8 @@ sobsmode_list = numpy.array(sobsmode_list)
 mjd_list = numpy.array(mjd_list)
 secofday_list = numpy.array(secofday_list)
 subref_list = numpy.array(subref_list)
+_2NDLO_list1 = numpy.array(_2NDLO_list1)
+_2NDLO_list2 = numpy.array(_2NDLO_list2)
 
 if obs['lo1st_sb_1'] == 'U':
     ul = -1
@@ -416,11 +443,9 @@ if obs['lo3rd_sb_1'] == 'U':
 else:
     ul1_3 = -1
 ul1 = ul1_1 * ul1_2 * ul1_3
-cdelt1 = ul1*0.079370340319607024 #(km/s)
-
-dv1 = (300000*cdelt1)/obs['restfreq_1']
-crpix1 = 8191.5 - obs['vlsr']/dv1 - (500-obs['if3rd_freq_1'])/cdelt1
-
+cdelt1_1 = ul1*0.079370340319607024 #[(km/s)/ch]
+#dv1 = (300000*cdelt1_1)/obs['restfreq_1']
+crpix1_1 = 8191.5 - obs['vlsr']/cdelt1_1 - (500-obs['if3rd_freq_1'])/0.061038881767686015
 
 if obs['lo1st_sb_2'] == 'U':
     ul = -1
@@ -429,23 +454,22 @@ else:
 imagfreq2 = obs['obsfreq_2'] + ul*obs['if1st_freq_2']*2
 lofreq2 = obs['obsfreq_2'] + ul*obs['if1st_freq_2']*1
 
-if obs['lo1st_sb_1'] == 'U':
+if obs['lo1st_sb_2'] == 'U':
     ul2_1 = +1
 else:
     ul2_1 = -1
-if obs['lo2nd_sb_1'] == 'U':
+if obs['lo2nd_sb_2'] == 'U':
     ul2_2 = +1
 else:
     ul2_2 = -1
-if obs['lo3rd_sb_1'] == 'U':
+if obs['lo3rd_sb_2'] == 'U':
     ul2_3 = +1
 else:
     ul2_3 = -1
 ul2 = ul2_1 * ul2_2 * ul2_3
-cdelt2 = ul2*0.079370340319607024 #(km/s)                                      
-
-dv2 = (300000*cdelt2)/obs['restfreq_2']
-crpix2 = 8191.5 - obs['vlsr']/dv2 - (500-obs['if3rd_freq_2'])/cdelt2
+cdelt1_2 = ul2*0.0830267951512371 #[(km/s)/ch]                                 
+#dv2 = (300000*cdelt1_2)/obs['restfreq_2']
+crpix1_2 = 8191.5 - obs['vlsr']/cdelt1_2 - (500-obs['if3rd_freq_2'])/0.061038881767686015
 
 #d1list
 read1 = {
@@ -459,8 +483,8 @@ read1 = {
     "TUNIT6" : 'counts', #デバイスファイルに追加
     "CTYPE1" : 'km/s', #デバイスファイルに追加
     "CRVAL1" : 0, #デバイスファイルに追加
-    "CRPIX1" : crpix1, #デバイスファイルに追加
-    "CDELT1" : cdelt1, #デバイスファイルに追加
+    "CRPIX1" : crpix1_1, #デバイスファイルに追加
+    "CDELT1" : cdelt1_1, #デバイスファイルに追加
     "CTYPE2" : 'deg', #未使用
     "CRVAL2" : 0, #未使用
     "CTYPE3" : 'deg', #未使用
@@ -517,7 +541,7 @@ read1 = {
     "SIDEBAND" : obs['lo1st_sb_1'],
     "_2NDSB" : obs['lo2nd_sb_1'],
     "_3RDSB" : obs['lo3rd_sb_1'],
-    "_2NDLO" : 8038.000000000,#要調査['SYNTH']
+    "_2NDLO" : _2NDLO_list1,#ドップラーシフト込み
     "_3RDLO" : obs['lo3rd_freq_1'],
     "SUBREF" : subref_list,
     "LOCKSTAT" : 'F'#未使用
@@ -537,8 +561,8 @@ read2 = {
     "TUNIT6" : 'counts', #デバイスファイルに追加
     "CTYPE1" : 'km/s', #デバイスファイルに追加 
     "CRVAL1" : 0, #デバイスファイルに追加
-    "CRPIX1" : crpix2, #デバイスファイルに追加
-    "CDELT1" : cdelt2, #デバイスファイルに追加
+    "CRPIX1" : crpix1_2, #デバイスファイルに追加
+    "CDELT1" : cdelt1_2, #デバイスファイルに追加
     "CTYPE2" : 'deg', #未使用
     "CRVAL2" : 0, #未使用
     "CTYPE3" : 'deg', #未使用
@@ -595,7 +619,7 @@ read2 = {
     "SIDEBAND" : obs['lo1st_sb_2'],
     "_2NDSB" : obs['lo2nd_sb_2'],
     "_3RDSB" : obs['lo3rd_sb_2'],
-    "_2NDLO" : 9301.318999999,#要調査['SYNTH']                                  
+    "_2NDLO" : _2NDLO_list2,#ドップラーシフト込み                              
     "_3RDLO" : obs['lo3rd_freq_2'],
     "SUBREF" : subref_list,
     "LOCKSTAT" : 'F'#未使用                                                    
