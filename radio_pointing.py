@@ -169,6 +169,8 @@ while num < n:
     while p_n < point_n:
         ra = obs['lambda_on']
         dec = obs['beta_on']
+        offx = 0
+        offy = 0
         
         
         print("num "+str(num))
@@ -176,11 +178,11 @@ while num < n:
         
         
         if num % 2 == 0:
-            ra += xgrid / 3600. * (p_n - (int(point_n/2)))
+            offx = xgrid * (p_n - (int(point_n/2)))
             #lamdel_list.append(xgrid * (p_n - (int(point_n/2))))
             #betdel_list.append(0)
         else:
-            dec += ygrid / 3600. * (p_n - (int(point_n/2)))
+            offy = ygrid * (p_n - (int(point_n/2)))
             #lamdel_list.append(0)
             #betdel_list.append(ygrid * (p_n - (int(point_n/2))))
         
@@ -325,7 +327,7 @@ while num < n:
         print('move ON')
         con.tracking_end()
         
-        con.radec_move(ra, dec, obs['coordsys'])
+        con.radec_move(ra, dec, obs['coordsys'], off_x = offx, off_y = offy)
         
         while not con.read_track():
             time.sleep(0.1)
