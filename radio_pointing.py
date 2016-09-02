@@ -36,6 +36,7 @@ if args.tau is not None: tau = args.tau
 # Main
 # ====
 import os
+import shutil
 import sys
 import time
 import signal
@@ -646,5 +647,6 @@ n2fits_write.write(read1,f1)
 n2fits_write.write(read2,f2)
 
 
+shutil.copy("/home/amigos/NECST/soft/server/hosei_230.txt", savedir+"/hosei_copy")
 obs_log.end_script(name)
 
