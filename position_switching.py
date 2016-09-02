@@ -57,8 +57,8 @@ def handler(num, flame):
     sys.exit()
 signal.signal(signal.SIGINT, handler)
 
-
-obs_items = open(obsfile, 'r').read().split('\n')
+obsdir = '/home/amigos/NECST/script/obslist/ps/'
+obs_items = open(obsdir+obsfile, 'r').read().split('\n')
 obs = {}
 for _item in obs_items:
     print(_item)
