@@ -26,11 +26,13 @@ def start_script(name, list):
             f.write(" %s %s\n" %(list[i*2], list[i*2+1]))
     f.close()
 
-def end_script(name):
+def end_script(name, file = ""):
     tstmp = time.strftime("%H:%M:%S")
     daystmp = time.strftime("%Y%m%d")
     f = open("/home/amigos/NECST/script/data/obs_log/"+daystmp+".txt", "a")
     f.write("-- "+tstmp+" end:"+name+"\n")
+    if file:
+        f.write("-- data:"+file+"\n")
     f.close()
 
 def weather_log():
