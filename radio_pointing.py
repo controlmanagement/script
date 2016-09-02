@@ -215,6 +215,9 @@ while num < n:
             dome_az = status["Current_Dome"]
             if dome_az < 0.:
                 dome_az += 360.
+            ant_az = status["Current_Az"]
+            if ant_az < 0.:
+                ant_az += 360.
 
         #p_n += 1
         
@@ -283,6 +286,10 @@ while num < n:
             dome_az = status["Current_Dome"]
             if dome_az < 0.:
                 dome_az += 360.
+            ant_az = status["Current_Az"]
+            if ant_az < 0.:
+                ant_az += 360.
+
 
         print('tracking OK')
         
@@ -345,7 +352,9 @@ while num < n:
             dome_az = status["Current_Dome"]
             if dome_az < 0.:
                 dome_az += 360.
-
+            ant_az = status["Current_Az"]
+            if ant_az < 0.:
+                ant_az += 360.
         print('tracking OK')
         
         print('ON')     
@@ -638,5 +647,4 @@ n2fits_write.write(read2,f2)
 
 
 obs_log.end_script(name)
-
 
