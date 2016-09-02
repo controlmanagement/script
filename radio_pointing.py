@@ -229,7 +229,7 @@ while num < n:
             print('Temp: %.2f'%(temp))
             
             print('get spectrum...')
-            dp1 = dp.set_track(obs['lambda_on'], obs['beta_on'], obs['vlsr'], obs['coordsys'], obs['lamdel'], obs['betdel'], offset_dcos, obs['coordsys'], integ_off*2+integ_on, obs['restfreq_1']/1000., obs['restfreq_2']/1000., sb1, sb2, 8038.000000000/1000., 9301.318999999/1000.)
+            dp1 = dp.set_track(obs['lambda_on'], obs['beta_on'], obs['vlsr'], obs['coordsys'], 0, 0, offset_dcos, obs['coordsys'], integ*2+integ, obs['restfreq_1']/1000., obs['restfreq_2']/1000., sb1, sb2, 8038.000000000/1000., 9301.318999999/1000.)
             d = con.oneshot(exposure=integ)
             d1 = d['dfs1'][0]
             d2 = d['dfs2'][0]
@@ -291,7 +291,7 @@ while num < n:
         if latest_hottime > _now:
             pass
         else:
-            dp1 = dp.set_track(obs['lambda_on'], obs['beta_on'], obs['vlsr'], obs['coordsys'], obs['lamdel'], obs['betdel'], offset_dcos, obs['coordsys'], integ_off+integ_on, obs['restfreq_1']/1000., obs['restfreq_2']/1000., sb1, sb2, 8038.000000000/1000., 9301.318999999/1000.)
+            dp1 = dp.set_track(obs['lambda_on'], obs['beta_on'], obs['vlsr'], obs['coordsys'], 0, 0, offset_dcos, obs['coordsys'], integ+integ, obs['restfreq_1']/1000., obs['restfreq_2']/1000., sb1, sb2, 8038.000000000/1000., 9301.318999999/1000.)
         temp = float(con.read_status()['CabinTemp1']) + 273.15
         d = con.oneshot(exposure=integ)
         d1 = d['dfs1'][0]
@@ -638,4 +638,5 @@ n2fits_write.write(read2,f2)
 
 
 obs_log.end_script(name)
+
 
