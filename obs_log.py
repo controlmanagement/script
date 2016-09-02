@@ -19,7 +19,7 @@ def start_script(name, list):
     tstmp = time.strftime("%H:%M:%S")
     daystmp = time.strftime("%Y%m%d")
     f = open("/home/amigos/NECST/script/data/obs_log/"+daystmp+".txt", "a")
-    f.write(" "+tstmp+" start:"+name+"\n")
+    f.write("- "+tstmp+" start:"+name+"\n")
     num = len(list)
     if num != 0:
         for i in range(num/2):
@@ -30,10 +30,11 @@ def end_script(name):
     tstmp = time.strftime("%H:%M:%S")
     daystmp = time.strftime("%Y%m%d")
     f = open("/home/amigos/NECST/script/data/obs_log/"+daystmp+".txt", "a")
-    f.write(" "+tstmp+" end:"+name+"\n")
+    f.write("-- "+tstmp+" end:"+name+"\n")
     f.close()
 
 def weather_log():
+    tstmp = time.strftime("%Y/%m/%d %H:%M:%S")
     daystmp = time.strftime("%Y%m%d")
     text = []
     fp = urllib2.urlopen("http://200.91.8.66/WeatherMonitor/WeatherMenu.html")
@@ -61,6 +62,9 @@ def weather_log():
     press = press[1].split()
     
     f = open("/home/amigos/NECST/script/data/obs_log/"+daystmp+".txt", "a")
+    f.write("\n")
+    f.write("- Weather\n")
+    f.write(" %s [JST]" %(tstmp))
     f.write(" In Temp %s [C]\n" %(in_temp[2]))
     f.write(" Out Temp %s [C]\n" %(out_temp[0]))
     f.write(" Dome Temp %s [C]\n" %(d_temp[2]))
@@ -70,5 +74,6 @@ def weather_log():
     f.write(" Wind Dir %s [deg]\n" %(wind_dir[0]))
     f.write(" Wind Sp %s [m/s]\n" %(wind_speed[2]))
     f.write(" Pressure %s [hPa]\n" %(press[0]))
+    f.write("\n")
     f.close()
     
