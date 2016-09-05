@@ -16,14 +16,18 @@ description = 'Logging observation'
 # ====
 
 def start_script(name, list):
-    tstmp = time.strftime("%H:%M:%S")
+    ut = time.gmtime()
+    tstmp = time.strftime("%H:%M:%S", ut)
     daystmp = time.strftime("%Y%m%d")
     f = open("/home/amigos/NECST/script/data/obs_log/"+daystmp+".txt", "a")
-    f.write("- "+tstmp+" start:"+name+"\n")
+    f.write("- [UTC] "+tstmp+" start:\n")
+    
+    arg = " "+name+" "
     num = len(list)
     if num != 0:
         for i in range(num/2):
-            f.write(" %s %s\n" %(list[i*2], list[i*2+1]))
+            arg += str(list[i*2])+" "+str(list[i*2+1])+" "
+    f.write(arg+"\n")
     f.close()
 
 def end_script(name, file = ""):
