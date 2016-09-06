@@ -76,8 +76,8 @@ for _item in obs_items:
 
 integ_on = obs['exposure']
 integ_off = obs['exposure_off']
-ra = obs['lambda_on']#on点x座標
-dec = obs['beta_on']#on点y座標
+#ra = obs['lambda_on']#on点x座標
+#dec = obs['beta_on']#on点y座標
 offx = obs['lambda_off']#off点x座標
 offy = obs['beta_off']#off点y座標
 if obs['otadel'].lower() == 'y':
@@ -91,10 +91,12 @@ else:
 
 if obs['coordsys'].lower() == 'j2000' or 'b1950':
     coord_sys = 'EQUATRIAL'
-    move = con.radec_move
+    ra = obs['lambda_on']#on点x座標                                           
+    dec = obs['beta_on']#on点y座標     
 elif obs['coordsys'].lower() == 'galactic':
     coord_sys = 'GALACTIC'
-    move = con.galactic_move
+    l = obs['lambda_on']#on点x座標                                           
+    b = obs['beta_on']#on点y座標     
 else:
     print('Error:coordsys')
     con.tracking_end()
@@ -160,8 +162,11 @@ while num < n:
         
     print('tracking start')
     con.tracking_end()
-        
-    move(offx, offy, obs['coordsys'], off_x=obs['lamdel_off'], off_y=obs['betdel_off'])
+    
+    if obs['coordsys'].lower() == 'j2000' or 'b1950':
+        con.radec_move(offx, offy, obs['coordsys'].lower(), off_x=obs['lamdel_off'], off_y=obs['betdel_off'])
+    elif obs['coordsys'].lower() == 'galactic':
+        con.galactic_move(offx, offy, off_x=obs['lamdel_off'], off_y=obs['betdel_off'])
     print('moving...')
 
     while not con.read_track():
@@ -276,8 +281,11 @@ while num < n:
 
     print('move ON')
     con.tracking_end()
-        
-    move(ra, dec, obs['coordsys'], off_x=obs['lamdel_off'], off_y=obs['betdel_off'])
+
+    if obs['coordsys'].lower() == 'j2000' or 'b1950':
+        con.radec_move(ra, dec, obs['coordsys'].lower(), off_x=obs['lamdel_off'], off_y=obs['betdel_off'])
+    elif obs['coordsys'].lower() == 'galactic':
+        con.galactic_move(l, b, off_x=obs['lamdel_off'], off_y=obs['betdel_off'])
     
     while not con.read_track():
         time.sleep(0.001)
@@ -414,7 +422,7 @@ else:
     ul2_3 = -1
 ul2 = ul2_1 * ul2_2 * ul2_3
 print(ul2)
-cdelt1_2 = (-1)*ul2*0.0830267951512371 #[(km/s)/ch]                                 
+cdelt1_2 = (-1)*ul2*0.0830267951512371 #[(km/s)/ch]                           
 #dv2 = (300000*cdelt2)/obs['restfreq_2']
 crpix1_2 = 8191.5 - obs['vlsr']/cdelt1_2 - (500-obs['if3rd_freq_2'])/0.061038881767686015
 
@@ -577,11 +585,12 @@ print(_2NDLO_list1)
 print(_2NDLO_list2)
 f1 = os.path.join(savedir,'n2ps_%s_IF1.fits'%(timestamp))
 f2 = os.path.join(savedir,'n2ps_%s_IF2.fits'%(timestamp))
-#numpy.save(f1+".npy",read1) numpyファイルの保存
-#numpy.save(f2+".npy",read2) numpyファイルの保存
+#numpy.save(f1+".npy",read1)
+#numpy.save(f2+".npy",read2)
 
 import n2fits_write
 n2fits_write.write(read1,f1)
 n2fits_write.write(read2,f2)
 
 obs_log.end_script(name)
+
