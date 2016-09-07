@@ -41,7 +41,8 @@ def end_script(name, file = ""):
     f.close()
 
 def weather_log():
-    tstmp = time.strftime("%Y/%m/%d %H:%M:%S")
+    ut = time.gmtime()
+    tstmp = time.strftime("%Y/%m/%d %H:%M:%S", ut)
     daystmp = time.strftime("%Y%m%d")
     text = []
     fp = urllib2.urlopen("http://200.91.8.66/WeatherMonitor/WeatherMenu.html")
@@ -71,7 +72,7 @@ def weather_log():
     f = open("/home/amigos/NECST/script/data/obs_log/"+daystmp+".txt", "a")
     f.write("\n")
     f.write("- Weather\n")
-    f.write(" %s [JST]" %(tstmp))
+    f.write(" %s [UTC]\n" %(tstmp))
     f.write(" In Temp %s [C]\n" %(in_temp[2]))
     f.write(" Out Temp %s [C]\n" %(out_temp[0]))
     f.write(" Dome Temp %s [C]\n" %(d_temp[2]))
