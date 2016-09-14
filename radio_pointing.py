@@ -86,13 +86,13 @@ if obs['otadel'].lower() == 'y':
 else:
     offset_dcos = 0
 if obs['lo1st_sb_1'] == 'U':#後半に似たのがあるけど気にしない               
-   sb1 = -1
+   sb1 = 1
 else:
-    sb1 = 1
+    sb1 = -1
 if obs['lo1st_sb_2'] == 'U':#後半に似たのがあるけど気にしない               
-    sb2 = -1
+    sb2 = 1
 else:
-    sb2 = 1  
+    sb2 = -1  
 
 
 import controller
@@ -436,11 +436,11 @@ _2NDLO_list1 = numpy.array(_2NDLO_list1)
 _2NDLO_list2 = numpy.array(_2NDLO_list2)
 
 if obs['lo1st_sb_1'] == 'U':
-    ul = -1
+    ul = 1
 else:
-    ul = +1
-imagfreq1 = obs['obsfreq_1'] + ul*obs['if1st_freq_1']*2  
-lofreq1 = obs['obsfreq_1'] + ul*obs['if1st_freq_1']*1
+    ul = -1
+imagfreq1 = obs['obsfreq_1'] - ul*obs['if1st_freq_1']*2  
+lofreq1 = obs['obsfreq_1'] - ul*obs['if1st_freq_1']*1
 
 if obs['lo1st_sb_1'] == 'U':
     ul1_1 = +1
@@ -455,16 +455,16 @@ if obs['lo3rd_sb_1'] == 'U':
 else:
     ul1_3 = -1
 ul1 = ul1_1 * ul1_2 * ul1_3
-cdelt1_1 = ul1*0.079370340319607024 #[(km/s)/ch]
+cdelt1_1 = (-1)*ul1*0.079370340319607024 #[(km/s)/ch]
 #dv1 = (300000*cdelt1_1)/obs['restfreq_1']
 crpix1_1 = 8191.5 - obs['vlsr']/cdelt1_1 - (500-obs['if3rd_freq_1'])/0.061038881767686015
 
 if obs['lo1st_sb_2'] == 'U':
-    ul = -1
+    ul = 1
 else:
-    ul = +1
-imagfreq2 = obs['obsfreq_2'] + ul*obs['if1st_freq_2']*2
-lofreq2 = obs['obsfreq_2'] + ul*obs['if1st_freq_2']*1
+    ul = -1
+imagfreq2 = obs['obsfreq_2'] - ul*obs['if1st_freq_2']*2
+lofreq2 = obs['obsfreq_2'] - ul*obs['if1st_freq_2']*1
 
 if obs['lo1st_sb_2'] == 'U':
     ul2_1 = +1
@@ -479,7 +479,7 @@ if obs['lo3rd_sb_2'] == 'U':
 else:
     ul2_3 = -1
 ul2 = ul2_1 * ul2_2 * ul2_3
-cdelt1_2 = ul2*0.0830267951512371 #[(km/s)/ch]                                 
+cdelt1_2 = (-1)*ul2*0.0830267951512371 #[(km/s)/ch]                                 
 #dv2 = (300000*cdelt1_2)/obs['restfreq_2']
 crpix1_2 = 8191.5 - obs['vlsr']/cdelt1_2 - (500-obs['if3rd_freq_2'])/0.061038881767686015
 
@@ -648,5 +648,5 @@ n2fits_write.write(read2,f2)
 
 
 shutil.copy("/home/amigos/NECST/soft/server/hosei_230.txt", savedir+"/hosei_copy")
-obs_log.end_script(name)
+obs_log.end_script(name, dirname)
 
