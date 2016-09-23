@@ -235,18 +235,17 @@ while num < n:
         print(dp1[3]['sg22']*1000)
         pass
 
-
-    print('OFF')
-    con.move_hot('out')
-    
-    print('get spectrum...')
-    if latest_hottime > _now:
-        pass
+        #if latest_hottime > _now:
+        #pass
     else:
         #dp1 = dp.set_track(83.80613,-5.374320,0,"J2000",0,0,0,"J2000",0,230.5380,220.3986765,1,-1,8.038000000000,9.301318999999)
         dp1 = dp.set_track(obs['lambda_on'], obs['beta_on'], obs['vlsr'], obs['coordsys'], obs['lamdel'], obs['betdel'], offset_dcos, obs['coordsys'], integ_off+integ_on, obs['restfreq_1']/1000., obs['restfreq_2']/1000., sb1, sb2, 8038.000000000/1000., 9301.318999999/1000.)
         #lambel_off,betdel_offかも？SYNTHが固定値の場合
     #print(dp1)
+    print('OFF')
+    con.move_hot('out')
+    print('get spectrum...')
+
     temp = float(con.read_status()['CabinTemp1']) + 273.15
     d = con.oneshot(exposure=integ_off)
     d1 = d['dfs1'][0]
