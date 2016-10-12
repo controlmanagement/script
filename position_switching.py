@@ -89,7 +89,7 @@ else:
 #else:
     #offset_dcos_off = 0
 
-if obs['coordsys'].lower() == 'j2000' or 'b1950':
+if obs['coordsys'].lower() == 'j2000' or obs['coordsys'].lower() == 'b1950':
     coord_sys = 'EQUATRIAL'
     ra = obs['lambda_on']#on点x座標                                           
     dec = obs['beta_on']#on点y座標     
@@ -163,9 +163,9 @@ while num < n:
     print('tracking start')
     con.tracking_end()
     
-    if obs['coordsys'].lower() == 'j2000' or 'b1950':
+    if coord_sys == 'EQUATRIAL':
         con.radec_move(offx, offy, obs['coordsys'].lower(), off_x=obs['lamdel_off'], off_y=obs['betdel_off'])
-    elif obs['coordsys'].lower() == 'galactic':
+    elif coord_sys == 'GALACTIC':
         con.galactic_move(offx, offy, off_x=obs['lamdel_off'], off_y=obs['betdel_off'])
     print('moving...')
 
@@ -281,9 +281,9 @@ while num < n:
     print('move ON')
     con.tracking_end()
 
-    if obs['coordsys'].lower() == 'j2000' or 'b1950':
+    if coord_sys == 'EQUATRIAL':
         con.radec_move(ra, dec, obs['coordsys'].lower(), off_x=obs['lamdel_off'], off_y=obs['betdel_off'])
-    elif obs['coordsys'].lower() == 'galactic':
+    elif coord_sys == 'GALACTIC':
         con.galactic_move(l, b, off_x=obs['lamdel_off'], off_y=obs['betdel_off'])
     
     while not con.read_track():
@@ -592,4 +592,5 @@ n2fits_write.write(read1,f1)
 n2fits_write.write(read2,f2)
 
 obs_log.end_script(name, dirname)
+
 
