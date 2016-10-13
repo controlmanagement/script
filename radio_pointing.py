@@ -97,7 +97,7 @@ else:
 
 import controller
 con = controller.controller()
-
+con.dome_track()
 
 def handler(num, flame):
     con.tracking_end()
@@ -203,6 +203,13 @@ while num < n:
         while not con.read_track():
             time.sleep(0.1)
             continue
+        while not con.read_track():#オーバーシュート防止
+            time.sleep(0.1)
+            continue
+        while not con.read_track():
+            time.sleep(0.1)
+            continue
+
         status = con.read_status()
         dome_az = status["Current_Dome"]
         if dome_az < 0.:
@@ -340,6 +347,14 @@ while num < n:
         while not con.read_track():
             time.sleep(0.1)
             continue
+        while not con.read_track():#オーバーシュート防止
+            time.sleep(0.1)
+            continue
+        while not con.read_track():
+            time.sleep(0.1)
+            continue
+
+
         status = con.read_status()
         dome_az = status["Current_Dome"]
         if dome_az < 0.:
@@ -649,4 +664,5 @@ n2fits_write.write(read2,f2)
 
 shutil.copy("/home/amigos/NECST/soft/server/hosei_230.txt", savedir+"/hosei_copy")
 obs_log.end_script(name, dirname)
+
 
