@@ -203,9 +203,11 @@ while num < n:
         while not con.read_track():
             time.sleep(0.1)
             continue
+        time.sleep(0.1)
         while not con.read_track():#オーバーシュート防止
             time.sleep(0.1)
             continue
+        time.sleep(0.1)
         while not con.read_track():
             time.sleep(0.1)
             continue
@@ -347,9 +349,11 @@ while num < n:
         while not con.read_track():
             time.sleep(0.1)
             continue
+        time.sleep(0.1)
         while not con.read_track():#オーバーシュート防止
             time.sleep(0.1)
             continue
+        time.sleep(0.1)
         while not con.read_track():
             time.sleep(0.1)
             continue
@@ -664,5 +668,7 @@ n2fits_write.write(read2,f2)
 
 shutil.copy("/home/amigos/NECST/soft/server/hosei_230.txt", savedir+"/hosei_copy")
 obs_log.end_script(name, dirname)
+
+
 
 
