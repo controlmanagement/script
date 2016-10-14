@@ -158,7 +158,7 @@ num = 0
 n = int(obs['nSeq'])
 latest_hottime = 0
 while num < n: 
-    print('observation :'+str(num))
+    print('observation :'+str(num+1))
         
     print('tracking start')
     con.tracking_end()
@@ -349,30 +349,43 @@ while num < n:
     num += 1
     continue
 
-#いらないかも
-d1_list = numpy.array(d1_list)
-d2_list = numpy.array(d2_list)
-tdim6_list = numpy.array(tdim6_list)
-date_list = numpy.array(date_list)
-tsys_list = numpy.array(tsys_list)
-thot_list = numpy.array(thot_list)
-vframe_list = numpy.array(vframe_list)
-vframe2_list = numpy.array(vframe2_list)
-lst_list = numpy.array(lst_list)
-az_list = numpy.array(az_list)
-el_list = numpy.array(el_list)
-tau_list = numpy.array(tau_list)
-hum_list = numpy.array(hum_list)
-tamb_list = numpy.array(tamb_list)
-press_list = numpy.array(press_list)
-windspee_list = numpy.array(windspee_list)
-winddire_list = numpy.array(winddire_list)
-sobsmode_list = numpy.array(sobsmode_list)
-mjd_list = numpy.array(mjd_list)
-secofday_list = numpy.array(secofday_list)
-subref_list = numpy.array(subref_list)
-_2NDLO_list1 = numpy.array(_2NDLO_list1)
-_2NDLO_list2 = numpy.array(_2NDLO_list2)
+print('R')#最初と最後をhotではさむ
+con.move_hot('in')
+            
+temp = float(con.read_status()['CabinTemp1']) + 273.15
+        
+print('Temp: %.2f'%(temp))
+print('get spectrum...')
+d = con.oneshot(exposure=integ_off)
+d1 = d['dfs1'][0]
+d2 = d['dfs2'][0]
+d1_list.append(d1)
+d2_list.append(d2)
+tdim6_list.append([16384,1,1])
+date_list.append(con.read_status()['Time'])
+thot_list.append(temp)
+vframe_list.append(dp1[0])
+vframe2_list.append(dp1[0])
+lst_list.append(con.read_status()['LST'])
+az_list.append(con.read_status()['Current_Az'])
+el_list.append(con.read_status()['Current_El'])
+tau_list.append(tau)
+hum_list.append(con.read_status()['OutHumi'])
+tamb_list.append(con.read_status()['OutTemp'])
+press_list.append(con.read_status()['Press'])
+windspee_list.append(con.read_status()['WindSp'])
+winddire_list.append(con.read_status()['WindDir'])
+sobsmode_list.append('HOT')
+mjd_list.append(con.read_status()['MJD'])
+secofday_list.append(con.read_status()['Secofday'])
+subref_list.append(con.read_status()['Current_M2'])
+P_hot = numpy.sum(d1)
+tsys_list.append(0)
+_2NDLO_list1.append(dp1[3]['sg21']*1000)
+_2NDLO_list2.append(dp1[3]['sg22']*1000)
+con.move_hot('out')
+
+
 
 if obs['lo1st_sb_1'] == 'U':
     ul = 1
@@ -592,5 +605,7 @@ n2fits_write.write(read1,f1)
 n2fits_write.write(read2,f2)
 
 obs_log.end_script(name, dirname)
+
+
 
 
