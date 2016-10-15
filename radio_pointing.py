@@ -197,7 +197,7 @@ while num < n:
         print('observation :'+str(num))
         print('tracking start')
         con.tracking_end()
-        con.radec_move(ra, dec, obs['coordsys'], off_x=off_x, off_y=off_y)
+        con.radec_move(ra, dec, obs['coordsys'], off_x=off_x, off_y=off_y, offcoord = obs['cosydel'])
         print('moving...')
         
         while not con.read_track():
@@ -242,7 +242,7 @@ while num < n:
             print('Temp: %.2f'%(temp))
             
             print('get spectrum...')
-            dp1 = dp.set_track(obs['lambda_on'], obs['beta_on'], obs['vlsr'], obs['coordsys'], 0, 0, offset_dcos, obs['coordsys'], integ*2+integ, obs['restfreq_1']/1000., obs['restfreq_2']/1000., sb1, sb2, 8038.000000000/1000., 9301.318999999/1000.)
+            dp1 = dp.set_track(obs['lambda_on'], obs['beta_on'], obs['vlsr'], obs['coordsys'], 0, 0, offset_dcos, obs['cosydel'], integ*2+integ, obs['restfreq_1']/1000., obs['restfreq_2']/1000., sb1, sb2, 8038.000000000/1000., 9301.318999999/1000.)
             d = con.oneshot(exposure=integ)
             d1 = d['dfs1'][0]
             d2 = d['dfs2'][0]
@@ -308,7 +308,7 @@ while num < n:
         if latest_hottime > _now:
             pass
         else:
-            dp1 = dp.set_track(obs['lambda_on'], obs['beta_on'], obs['vlsr'], obs['coordsys'], 0, 0, offset_dcos, obs['coordsys'], integ+integ, obs['restfreq_1']/1000., obs['restfreq_2']/1000., sb1, sb2, 8038.000000000/1000., 9301.318999999/1000.)
+            dp1 = dp.set_track(obs['lambda_on'], obs['beta_on'], obs['vlsr'], obs['coordsys'], 0, 0, offset_dcos, obs['cosydel'], integ+integ, obs['restfreq_1']/1000., obs['restfreq_2']/1000., sb1, sb2, 8038.000000000/1000., 9301.318999999/1000.)
         temp = float(con.read_status()['CabinTemp1']) + 273.15
         d = con.oneshot(exposure=integ)
         d1 = d['dfs1'][0]
@@ -344,7 +344,7 @@ while num < n:
         print('move ON')
         con.tracking_end()
         
-        con.radec_move(ra, dec, obs['coordsys'], off_x = off_x, off_y = off_y)
+        con.radec_move(ra, dec, obs['coordsys'], off_x = off_x, off_y = off_y, offcoord = obs['cosydel'])
         
         while not con.read_track():
             time.sleep(0.1)
@@ -427,32 +427,6 @@ print("====test======")
 print("num:"+str(num))
 print("p_n:"+str(p_n))
 
-
-
-#???
-d1_list = numpy.array(d1_list)
-d2_list = numpy.array(d2_list)
-tdim6_list = numpy.array(tdim6_list)
-date_list = numpy.array(date_list)
-tsys_list = numpy.array(tsys_list)
-thot_list = numpy.array(thot_list)
-vframe_list = numpy.array(vframe_list)
-vframe2_list = numpy.array(vframe2_list)
-lst_list = numpy.array(lst_list)
-az_list = numpy.array(az_list)
-el_list = numpy.array(el_list)
-tau_list = numpy.array(tau_list)
-hum_list = numpy.array(hum_list)
-tamb_list = numpy.array(tamb_list)
-press_list = numpy.array(press_list)
-windspee_list = numpy.array(windspee_list)
-winddire_list = numpy.array(winddire_list)
-sobsmode_list = numpy.array(sobsmode_list)
-mjd_list = numpy.array(mjd_list)
-secofday_list = numpy.array(secofday_list)
-subref_list = numpy.array(subref_list)
-_2NDLO_list1 = numpy.array(_2NDLO_list1)
-_2NDLO_list2 = numpy.array(_2NDLO_list2)
 
 if obs['lo1st_sb_1'] == 'U':
     ul = 1
