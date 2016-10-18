@@ -36,7 +36,7 @@ list = []
 if snow:
     list.append("--snow")
     list.append(snow)
-osb_log.start_script(name, list)
+obs_log.start_script(name, list)
 
 ctrl = controller.controller()
 
@@ -58,7 +58,7 @@ try:
     print("dome_move")
     ctrl.dome_move(90)
     ret = ctrl.read_status()
-    while ret["Current_Az"] != 0.0 or ret["Current_El"] != 45.0:
+    while round(ret["Current_Az"], 2) != 0.0 or round(ret["Current_El"], 2) != 45.0:
         time.sleep(0.5)
         ret = ctrl.read_status()
     ctrl.drive_off()
