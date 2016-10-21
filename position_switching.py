@@ -49,6 +49,7 @@ list.append(obsfile)
 obs_log.start_script(name, list)
 
 con = controller.controller()
+con.dome_track()
 import signal
 def handler(num, flame):
     print("!!ctrl+C!!")
@@ -164,9 +165,9 @@ while num < n:
     con.tracking_end()
     
     if coord_sys == 'EQUATRIAL':
-        con.radec_move(offx, offy, obs['coordsys'].lower(), off_x=obs['lamdel_off'], off_y=obs['betdel_off'])
+        con.radec_move(offx, offy, obs['coordsys'].lower(), off_x=obs['lamdel_off'], off_y=obs['betdel_off'], offcoord = obs['cosydel'])
     elif coord_sys == 'GALACTIC':
-        con.galactic_move(offx, offy, off_x=obs['lamdel_off'], off_y=obs['betdel_off'])
+        con.galactic_move(offx, offy, off_x=obs['lamdel_off'], off_y=obs['betdel_off'], offcoord = obs['cosydel'])
     print('moving...')
 
     while not con.read_track():
@@ -280,9 +281,9 @@ while num < n:
     con.tracking_end()
 
     if coord_sys == 'EQUATRIAL':
-        con.radec_move(ra, dec, obs['coordsys'].lower(), off_x=obs['lamdel_off'], off_y=obs['betdel_off'])
+        con.radec_move(ra, dec, obs['coordsys'].lower(), off_x=obs['lamdel'], off_y=obs['betdel'], offcoord = obs['cosydel'])
     elif coord_sys == 'GALACTIC':
-        con.galactic_move(l, b, off_x=obs['lamdel_off'], off_y=obs['betdel_off'])
+        con.galactic_move(l, b, off_x=obs['lamdel'], off_y=obs['betdel'], offcoord = obs['cosydel'])
     
     while not con.read_track():
         time.sleep(0.001)
@@ -603,6 +604,7 @@ n2fits_write.write(read1,f1)
 n2fits_write.write(read2,f2)
 
 obs_log.end_script(name, dirname)
+
 
 
 
