@@ -142,7 +142,7 @@ class opt_point_controller(object):
                 #track_flag = ["TRUE", "TRUE"] #for test
                 track_flag = self.ctrl.read_track()
                 #wait track
-                while track_flag[0] == "FALSE" or track_flag[1] == "FALSE":
+                while track_flag == False:
                     time.sleep(0.5)
                     track_flag = self.ctrl.read_track()
                     continue
