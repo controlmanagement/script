@@ -93,7 +93,15 @@ if obs['lo1st_sb_2'] == 'U':#後半に似たのがあるけど気にしない
     sb2 = 1
 else:
     sb2 = -1  
-
+if obs['cosydel'].lower() == 'j2000' or obs['cosydel'].lower() == 'b1950':
+    cosydel = 'EQUATORIAL'
+elif obs['cosydel'].lower() == 'galactic':
+    cosydel = 'GALACTIC'
+elif obs['cosydel'].lower() == 'horizontal':
+    cosydel = 'HORIZONTAL'
+else:
+    print('cosydel:Error')
+    sys.exit()
 
 import controller
 con = controller.controller()
@@ -197,7 +205,7 @@ while num < n:
         print('observation :'+str(num))
         print('tracking start')
         con.tracking_end()
-        con.radec_move(ra, dec, obs['coordsys'], off_x=off_x, off_y=off_y, offcoord = obs['cosydel'])
+        con.radec_move(ra, dec, obs['coordsys'], off_x=off_x, off_y=off_y, offcoord = cosydel)
         print('moving...')
         
         while not con.read_track():
@@ -242,7 +250,7 @@ while num < n:
             print('Temp: %.2f'%(temp))
             
             print('get spectrum...')
-            dp1 = dp.set_track(obs['lambda_on'], obs['beta_on'], obs['vlsr'], obs['coordsys'], 0, 0, offset_dcos, obs['cosydel'], integ*2+integ, obs['restfreq_1']/1000., obs['restfreq_2']/1000., sb1, sb2, 8038.000000000/1000., 9301.318999999/1000.)
+            dp1 = dp.set_track(obs['lambda_on'], obs['beta_on'], obs['vlsr'], obs['coordsys'], 0, 0, offset_dcos, obs['coordsys'], integ*2+integ, obs['restfreq_1']/1000., obs['restfreq_2']/1000., sb1, sb2, 8038.000000000/1000., 9301.318999999/1000.)#obs['cosydel']非対応
             d = con.oneshot(exposure=integ)
             d1 = d['dfs1'][0]
             d2 = d['dfs2'][0]
@@ -308,7 +316,7 @@ while num < n:
         if latest_hottime > _now:
             pass
         else:
-            dp1 = dp.set_track(obs['lambda_on'], obs['beta_on'], obs['vlsr'], obs['coordsys'], 0, 0, offset_dcos, obs['cosydel'], integ+integ, obs['restfreq_1']/1000., obs['restfreq_2']/1000., sb1, sb2, 8038.000000000/1000., 9301.318999999/1000.)
+            dp1 = dp.set_track(obs['lambda_on'], obs['beta_on'], obs['vlsr'], obs['coordsys'], 0, 0, offset_dcos, obs['coordsys'], integ+integ, obs['restfreq_1']/1000., obs['restfreq_2']/1000., sb1, sb2, 8038.000000000/1000., 9301.318999999/1000.)#obs['cosydel']非対応
         temp = float(con.read_status()['CabinTemp1']) + 273.15
         d = con.oneshot(exposure=integ)
         d1 = d['dfs1'][0]
@@ -344,7 +352,7 @@ while num < n:
         print('move ON')
         con.tracking_end()
         
-        con.radec_move(ra, dec, obs['coordsys'], off_x = off_x, off_y = off_y, offcoord = obs['cosydel'])
+        con.radec_move(ra, dec, obs['coordsys'], off_x = off_x, off_y = off_y, offcoord = cosydel)
         
         while not con.read_track():
             time.sleep(0.1)
@@ -642,6 +650,7 @@ n2fits_write.write(read2,f2)
 
 shutil.copy("/home/amigos/NECST/soft/server/hosei_230.txt", savedir+"/hosei_copy")
 obs_log.end_script(name, dirname)
+
 
 
 
