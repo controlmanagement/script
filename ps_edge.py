@@ -131,6 +131,17 @@ else:
     print('Error:coordsys')
     con.tracking_end()
     sys.exit()
+
+if obs['cosydel'].lower() == 'j2000' or obs['cosydel'].lower() == 'b1950':
+    cosydel = 'EQUATORIAL'
+elif obs['cosydel'].lower() == 'galactic':
+    cosydel = 'GALACTIC'
+elif obs['cosydel'].lower() == 'horizontal':
+    cosydel = 'HORIZONTAL'
+else:
+    print('cosydel:Error')
+    sys.exit()
+
 if obs['lo1st_sb_1'] == 'U':#後半に似たのがあるけど気にしない               
    sb1 = 1
 else:
@@ -240,7 +251,7 @@ while num < n:
         pass
     elif coord_sys == 'PLANET':
         print(planet)
-        con.planet_move(planet, off_x=offset_x, off_y=offset_y, dcos = offset_dcos, offcoord = obs['cosydel'])
+        con.planet_move(planet, off_x=offset_x, off_y=offset_y, dcos = offset_dcos, offcoord = cosydel)
         print('off_x : ',offset_x)
         print('off_y : ',offset_y)
         print('moving...')
@@ -379,7 +390,7 @@ while num < n:
                 off_x = offset_x + (-2*edge+obs['xgrid']*lp)*gx
                 off_y = offset_y + (-2*edge+obs['ygrid']*lp)*gy
                 con.planet_move(planet, off_x = off_x,off_y = off_y, 
-                                offcoord = obs['cosydel'],dcos = offset_dcos)
+                                offcoord = cosydel,dcos = offset_dcos)
                 print('right or upper')
                 print('off_x : ', off_x)
                 print('off_y : ', off_y)
@@ -387,7 +398,7 @@ while num < n:
                 off_x = offset_x + (obs['xgrid']*lp)*gx
                 off_y = offset_y + (obs['ygrid']*lp)*gy
                 con.planet_move(planet, off_x = off_x,off_y = off_y, 
-                                offcoord = obs['cosydel'],dcos = offset_dcos)
+                                offcoord = cosydel,dcos = offset_dcos)
                 print('left or lower')
                 print('off_x : ', off_x)
                 print('off_y : ', off_y)
@@ -723,4 +734,8 @@ n2fits_write.write(read2,f2)
 
 shutil.copy("/home/amigos/NECST/soft/server/hosei_230.txt", savedir+"/hosei_copy")
 obs_log.end_script(name, dirname)
+
+
+
+
 
