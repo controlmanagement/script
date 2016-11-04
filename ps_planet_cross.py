@@ -323,7 +323,7 @@ while num < n:
         
         print('OFF')
         con.move_hot('out')
-        con.planet_move(planet, off_x=obs['lamdel_off'], off_y=['betdel_off'], offcoord = cosydel, dcos = offset_dcos)
+        con.planet_move(planet, off_x=obs['lamdel_off'], off_y=obs['betdel_off'], offcoord = cosydel, dcos = offset_dcos)
         
         while not con.read_track():
             time.sleep(0.1)
@@ -730,4 +730,6 @@ n2fits_write.write(read2,f2)
 
 shutil.copy("/home/amigos/NECST/soft/server/hosei_230.txt", savedir+"/hosei_copy")
 obs_log.end_script(name, dirname)
+
+
 
