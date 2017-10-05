@@ -7,7 +7,7 @@
 # Info
 # ----
 
-name = '_otf_2016'
+name = '_otf_2017'
 description = 'Get OTF spectrum'
 
 # Config Parameters
@@ -53,6 +53,7 @@ def handler(num, flame):
     print("!!ctrl+C!!")
     print("STOP MOVING")
     con.tracking_end()
+    con.dome_track_end()
     sys.exit()
 signal.signal(signal.SIGINT, handler)
 
@@ -61,9 +62,9 @@ list.append("--obsfile")
 list.append(obsfile)
 obs_log.start_script(name, list)
 
-
-
+# read obsfile
 obsdir = '/home/amigos/NECST/script/obslist/otf/'
+#obsdir = './obslist/'
 obs_items = open(obsdir+obsfile, 'r').read().split('\n')
 obs = {}
 for _item in obs_items:
@@ -139,12 +140,12 @@ for _item in obs_items:
 
 integ_on = obs['exposure']
 integ_off = obs['exposure_off']
-#ra = obs['lambda_on']#on点x座標,l,いらない？
-#dec = obs['beta_on']#on点y座標,b,いらない？
+#onx = obs['lambda_on']#on点x座標,l,いらない？
+#ony = obs['beta_on']#on点y座標,b,いらない？
 offx = obs['lambda_off']#off点x座標
 offy = obs['beta_off']#off点y座標
 
-# Initial configurations
+# Save file
 # ----------------------
 
 datahome = 'data'
@@ -233,7 +234,8 @@ d1_list = []
 d2_list = []
 tdim6_list = []
 date_list = []
-tsys_list = []
+tsys_list1 = []
+tsys_list2 = []
 thot_list = []
 tcold_list = []
 vframe_list = []
@@ -256,6 +258,8 @@ _2NDLO_list2 = []
 lamdel_list = []
 betdel_list = []
 subscan_list = []
+lambda_list = []
+beta_list = []
 
 print('Start experimentation')
 print('')
@@ -321,8 +325,14 @@ while rp_num < rp:
         
             print('Temp: %.2f'%(temp))
             print('get spectrum...')
-            dp2 = dp.set_track(obs['lambda_on'], obs['beta_on'], obs['vlsr'], obs['coordsys'], obs['lamdel_off'], obs['betdel_off'], offset_dcos, obs['cosydel'], integ_off*2+integ_on+rampt+(dt*scan_point), obs['restfreq_1']/1000., obs['restfreq_2']/1000., sb1, sb2, 8038.000000000/1000., 9301.318999999/1000.)#SYNTHが固定値の場合
-            dp1 = dp.set_track(obs['lambda_on'], obs['beta_on'], obs['vlsr'], obs['coordsys'], obs['lamdel_off'], obs['betdel_off'], offset_dcos, obs['cosydel'], integ_off*2+integ_on+rampt, obs['restfreq_1']/1000., obs['restfreq_2']/1000., sb1, sb2, 8038.000000000/1000., 9301.318999999/1000.)#SYNTHが固定値の場合
+            dp2 = dp.set_track(obs['lambda_on'], obs['beta_on'], obs['vlsr'], obs['coordsys'], 
+                               sx + num*gridx + total_count*dx, sy + num*gridy + total_count*dy, 
+                               offset_dcos, obs['cosydel'], integ_off*2+rampt+(dt*scan_point), 
+                               obs['restfreq_1']/1000., obs['restfreq_2']/1000., sb1, sb2, 8038.000000000/1000., 9301.318999999/1000.)
+            dp1 = dp.set_track(obs['lambda_on'], obs['beta_on'], obs['vlsr'], obs['coordsys'], 
+                               sx + num*gridx, sy + num*gridy, offset_dcos, obs['cosydel'], 
+                               integ_off*2+rampt, obs['restfreq_1']/1000., obs['restfreq_2']/1000., 
+                               sb1, sb2, 8038.000000000/1000., 9301.318999999/1000.)
             d = con.oneshot(exposure=integ_off)
             d1 = d['dfs1'][0]
             d2 = d['dfs2'][0]
@@ -347,19 +357,29 @@ while rp_num < rp:
             secofday_list.append(con.read_status()['Secofday'])
             subref_list.append(con.read_status()['Current_M2'])
             latest_hottime = time.time()
-            P_hot = numpy.sum(d1)
-            tsys_list.append(0)
+            P_hot1 = numpy.sum(d1)
+            P_hot2 = numpy.sum(d2)
+            tsys_list1.append(0)
+            tsys_list2.append(0)
             _2NDLO_list1.append(dp1[3]['sg21']*1000)
             _2NDLO_list2.append(dp1[3]['sg22']*1000) 
-            lamdel_list.append(0)#
-            betdel_list.append(0)#
+            lamdel_list.append(0)
+            betdel_list.append(0)
             subscan_list.append(int(num)+1)
+            lambda_list.append(obs['lambda_off'])
+            beta_list.append(obs['beta_off'])
             pass
 
 
         else:
-            dp2 = dp.set_track(obs['lambda_on'], obs['beta_on'], obs['vlsr'], obs['coordsys'], obs['lamdel_off'], obs['betdel_off'], offset_dcos, obs['cosydel'], integ_off+integ_on+rampt+(dt*scan_point), obs['restfreq_1']/1000., obs['restfreq_2']/1000., sb1, sb2, 8038.000000000/1000., 9301.318999999/1000.)#SYNTHが固定値の場合
-            dp1 = dp.set_track(obs['lambda_on'], obs['beta_on'], obs['vlsr'], obs['coordsys'], obs['lamdel_off'], obs['betdel_off'], offset_dcos, obs['cosydel'], integ_off+integ_on+rampt, obs['restfreq_1']/1000., obs['restfreq_2']/1000., sb1, sb2, 8038.000000000/1000., 9301.318999999/1000.)#SYNTHが固定値の場合
+            dp2 = dp.set_track(obs['lambda_on'], obs['beta_on'], obs['vlsr'], obs['coordsys'], 
+                               sx + num*gridx + total_count*dx, sy + num*gridy + total_count*dy, 
+                               offset_dcos, obs['cosydel'], integ_off+rampt+(dt*scan_point), 
+                               obs['restfreq_1']/1000., obs['restfreq_2']/1000., sb1, sb2, 8038.000000000/1000., 9301.318999999/1000.)
+            dp1 = dp.set_track(obs['lambda_on'], obs['beta_on'], obs['vlsr'], obs['coordsys'], 
+                               sx + num*gridx , sy + num*gridy, offset_dcos, obs['cosydel'], 
+                               integ_off+rampt, obs['restfreq_1']/1000., obs['restfreq_2']/1000., 
+                               sb1, sb2, 8038.000000000/1000., 9301.318999999/1000.)
             pass
 
         print('OFF')
@@ -390,14 +410,20 @@ while rp_num < rp:
         mjd_list.append(con.read_status()['MJD'])
         secofday_list.append(con.read_status()['Secofday'])
         subref_list.append(con.read_status()['Current_M2'])
-        P_sky = numpy.sum(d1)
-        tsys = temp/(P_hot/P_sky-1)
-        tsys_list.append(tsys)
+        P_sky1 = numpy.sum(d1)
+        P_sky2 = numpy.sum(d2)
+        tsys1 = temp/(P_hot1/P_sky1-1)
+        tsys2 = temp/(P_hot2/P_sky2-1)
+        tsys_list1.append(tsys1)
+        tsys_list2.append(tsys2)
         _2NDLO_list1.append(dp1[3]['sg21']*1000)
         _2NDLO_list2.append(dp1[3]['sg22']*1000) 
         lamdel_list.append(0)#
         betdel_list.append(0)#
         subscan_list.append(int(num)+1)
+        lambda_list.append(obs['lambda_off'])
+        beta_list.append(obs['beta_off'])
+
 
         try:#デバッグ用
             print('move ON')
@@ -433,13 +459,13 @@ while rp_num < rp:
             print('reach ramp_start')
             #rampまで移動
             con.tracking_end()# 2つの thread がぶつかるのを防ぐ
-            print(' OTF scan_satart!! ')
+            print(' OTF scan_start!! ')
             print('move ON')
             start_on = con.otf_scan(lambda_on, beta_on, offset_dcos, coord_sys, dx, dy, dt, scan_point, rampt, 0, lamda, 'hosei_230.txt', obs['coordsys'].lower(), off_x = sx + num*gridx, off_y = sy + num*gridy, off_coord = cosydel)
-            d = con.oneshot(repeat = scan_point ,exposure = integ_on ,
-                            stime = start_on)
+            d = con.oneshot(repeat = scan_point ,exposure = integ_on ,stime = start_on)
             print('getting_data...')
 
+            start_on=10
             while start_on + obs['otflen']/24./3600. > 40587 + time.time()/(24.*3600.):
                 time.sleep(0.001)
 
@@ -485,12 +511,16 @@ while rp_num < rp:
                 mjd_list.append(mjd)
                 secofday_list.append(sec)
                 subref_list.append(subref)
-                tsys_list.append(tsys)
+                tsys_list1.append(tsys1)
+                tsys_list2.append(tsys2)
                 _2NDLO_list1.append(dp1[3]['sg21']*1000)
                 _2NDLO_list2.append(dp1[3]['sg22']*1000)
                 lamdel_list.append(lamdel_on)
                 betdel_list.append(betdel_on)
                 subscan_list.append(int(num)+1)
+                lambda_list.append(obs['lambda_on'])
+                beta_list.append(obs['beta_on'])
+
                 _on += 1
 
             print('stop')
@@ -536,17 +566,20 @@ sobsmode_list.append('HOT')
 mjd_list.append(con.read_status()['MJD'])
 secofday_list.append(con.read_status()['Secofday'])
 subref_list.append(con.read_status()['Current_M2'])
-P_hot = numpy.sum(d1)
-tsys_list.append(0)
+tsys_list1.append(0)
+tsys_list2.append(0)
 _2NDLO_list1.append(dp1[3]['sg21']*1000)
 _2NDLO_list2.append(dp1[3]['sg22']*1000)
 lamdel_list.append(0)
 betdel_list.append(0)
 subscan_list.append(int(num)+1)
+lambda_list.append(obs['lambda_off'])
+beta_list.append(obs['beta_off'])
 con.move_hot('out')
 
 print('observation end')
 con.tracking_end()
+con.dome_track_end()
 
 #Other_list_data
 if obs['lo1st_sb_1'] == 'U':
@@ -581,15 +614,15 @@ else:
 imagfreq2 = obs['obsfreq_2'] - ul*obs['if1st_freq_2']*2
 lofreq2 = obs['obsfreq_2'] - ul*obs['if1st_freq_2']*1
 
-if obs['lo1st_sb_1'] == 'U':
+if obs['lo1st_sb_2'] == 'U':
     ul2_1 = +1
 else:
     ul2_1 = -1
-if obs['lo2nd_sb_1'] == 'U':
+if obs['lo2nd_sb_2'] == 'U':
     ul2_2 = +1
 else:
     ul2_2 = -1
-if obs['lo3rd_sb_1'] == 'U':
+if obs['lo3rd_sb_2'] == 'U':
     ul2_3 = +1
 else:
     ul2_3 = -1
@@ -604,7 +637,7 @@ read1 = {
     "BANDWID" : 1000000000, #デバイスファイルに追加
     "DATE-OBS" : date_list, 
     "EXPOSURE" : obs['exposure'],
-    "TSYS" : tsys_list,
+    "TSYS" : tsys_list1,
     "DATA" : d1_list,
     "TDIM6" : tdim6_list, #デバイスファイルに追加
     "TUNIT6" : 'counts', #デバイスファイルに追加
@@ -613,9 +646,9 @@ read1 = {
     "CRPIX1" : crpix1_1, #デバイスファイルに追加
     "CDELT1" : cdelt1_1, #デバイスファイルに追加
     "CTYPE2" : 'deg', #未使用
-    "CRVAL2" : 0, #未使用
+    "CRVAL2" : lambda_list, 
     "CTYPE3" : 'deg', #未使用
-    "CRVAL3" : 0, #未使用
+    "CRVAL3" : beta_list,
     "T_VLSR" : 0, #未使用
     "OBSERVER" : obs['observer'],
     "SCAN" : 1, #要確認
@@ -681,7 +714,7 @@ read2 = {
     "BANDWID" : 1000000000, #デバイスファイルに追加
     "EXPOSURE" : obs['exposure'],
     "DATE-OBS" : date_list, 
-    "TSYS" : tsys_list,
+    "TSYS" : tsys_list2,
     "DATA" : d2_list,
     "TDIM6" : tdim6_list, #デバイスファイルに追加
     "TUNIT6" : 'counts', #デバイスファイルに追加
@@ -690,9 +723,9 @@ read2 = {
     "CRPIX1" : crpix1_2, #デバイスファイルに追加
     "CDELT1" : cdelt1_2, #デバイスファイルに追加
     "CTYPE2" : 'deg', #未使用
-    "CRVAL2" : 0, #未使用
+    "CRVAL2" : lambda_list,
     "CTYPE3" : 'deg', #未使用
-    "CRVAL3" : 0, #未使用
+    "CRVAL3" : beta_list,
     "T_VLSR" : 0, #未使用
     "OBSERVER" : obs['observer'],
     "SCAN" : 1, #要確認
@@ -752,22 +785,14 @@ read2 = {
     }
 
 con.tracking_end()
-#改築予定地
-#f1 = os.path.join(savedir,'n2line_otf_%s_IF1.fits'%(timestamp))
+
 f1 = os.path.join(savedir,'n%s_%s_%s_otf_%s.fits'%(timestamp ,obs['molecule_1'],obs['transiti_1'].split('=')[1],obs['object']))
-#f2 = os.path.join(savedir,'n2line_otf_%s_IF2.fits'%(timestamp))
 f2 = os.path.join(savedir,'n%s_%s_%s_otf_%s.fits'%(timestamp ,obs['molecule_2'],obs['transiti_2'].split('=')[1],obs['object']))
 #numpy.save(f1+".npy",read1)
 #numpy.save(f2+".npy",read2)
 
-print('dp1 : ',dp1)
 print('VFRAME1 : ',dp1[0])
-print('2ndLO1_1 : ',dp1[3]['sg21']*1000)
-print('2ndLO1_2 : ',dp1[3]['sg22']*1000)
 print('dp2 : ',dp2)
-print('VFRAME2 : ',dp2[0])
-print('2ndLO2_1 : ',dp2[3]['sg21']*1000)
-print('2ndLO2_2 : ',dp2[3]['sg22']*1000)
 
 import n2fits_write
 n2fits_write.write(read1,f1)
@@ -775,4 +800,6 @@ n2fits_write.write(read2,f2)
 
 shutil.copy("/home/amigos/NECST/soft/server/hosei_230.txt", savedir+"/hosei_copy")
 obs_log.end_script(name, dirname)
+
+
 
