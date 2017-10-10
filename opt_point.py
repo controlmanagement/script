@@ -142,10 +142,12 @@ class opt_point_controller(object):
                 #track_flag = ["TRUE", "TRUE"] #for test
                 track_flag = self.ctrl.read_track()
                 #wait track
-                while track_flag == False:
-                    time.sleep(0.5)
-                    track_flag = self.ctrl.read_track()
-                    continue
+                for i in range(3):
+                    while track_flag == False:
+                        time.sleep(0.5)
+                        track_flag = self.ctrl.read_track()
+                        continue
+                    time.sleep(0.1)
                 
                 status = self.ctrl.read_status()
                 dome_az = status["Current_Dome"]
