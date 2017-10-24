@@ -126,28 +126,27 @@ class opt_point_controller(object):
         data_name = "opt_"+str(date.year)+month+day+hour+minute+second
         
         
-        for i in range(num):
+        for _tbl in table:
             tv = time.time()
             mjd2 = tv/24./3600. + 40587.0 # 40587.0 = MJD0
             
             #calculate Az and El for check
-            ret = self.calc_star_azel(table[i][1], table[i][2], mjd2)
+            ret = self.calc_star_azel(_tbl[1], _tbl[2], mjd2)
             real_el = ret[1]
             
             if real_el >= 30. and real_el <= 80.:
-                self.ctrl.radec_move(table[i][1], table[i][2], "J2000", 0, 0, hosei = 'hosei_opt.txt', offcoord = 'HORIZONTAL', lamda = 0.5)
-                print(table[i][1], table[i][2])
+                self.ctrl.radec_move(_tbl[1], _tbl[2], "J2000", 0, 0, hosei = 'hosei_opt.txt', offcoord = 'HORIZONTAL', lamda = 0.5)
+                print(_tbl[1], _tbl[2])
                 print(ret)
                 
                 #track_flag = ["TRUE", "TRUE"] #for test
-                track_flag = self.ctrl.read_track()
+                track_flag = [False, False, False]
                 #wait track
-                for i in range(3):
-                    while track_flag == False:
+                while all(track_flag) == False:
+                    for _flg in track_flag:
                         time.sleep(0.5)
-                        track_flag = self.ctrl.read_track()
-                        continue
-                    time.sleep(0.1)
+                        _flg = self.ctrl.read_track()
+                    continue
                 
                 status = self.ctrl.read_status()
                 dome_az = status["Current_Dome"]
@@ -166,8 +165,8 @@ class opt_point_controller(object):
                 
                 tv = time.time()
                 mjd2 = tv/24./3600. + 40587.0
-                n_star = self.calc_star_azel(table[i][1], table[i][2], mjd2)
-                self.ccd.all_sky_shot(table[i][0], table[i][3], n_star[0], n_star[1], data_name, status)
+                n_star = self.calc_star_azel(_tbl[1], _tbl[2], mjd2)
+                self.ccd.all_sky_shot(_tbl[0], _tbl[3], n_star[0], n_star[1], data_name, status)
             else:
                 #out of range(El)
                 pass
