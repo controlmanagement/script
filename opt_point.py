@@ -143,10 +143,12 @@ class opt_point_controller(object):
                 track_flag = [False, False, False]
                 #wait track
                 while all(track_flag) == False:
-                    for _flg in track_flag:
-                        time.sleep(0.5)
-                        _flg = self.ctrl.read_track()
-                    continue
+                    time.sleep(0.5)
+                    track_flag[0] = track_flag[1]
+                    track_flag[1] = track_flag[2]
+                    track_flag[2] = self.ctrl.read_track()
+                    #print(track_flag)
+                    #continue
                 
                 status = self.ctrl.read_status()
                 dome_az = status["Current_Dome"]
@@ -161,7 +163,7 @@ class opt_point_controller(object):
                     dome_az = status["Current_Dome"]
                     if dome_az < 0.:
                         dome_az += 360.
-                    continue
+                    #continue
                 
                 tv = time.time()
                 mjd2 = tv/24./3600. + 40587.0
